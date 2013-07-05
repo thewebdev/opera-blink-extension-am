@@ -1,0 +1,35 @@
+﻿{
+	"name": "Google Adsense Monitor",
+	"version": "2.0",
+	"manifest_version": 2,	
+	"description": "Preview your Adsense earnings in an Opera Speed Dial.",
+	"developer": {
+		"name": "M Shabeer Ali",
+		"url": "http://adsensemonitor.tumblr.com/submit"
+	},
+	"icons": {
+		"128": "pix/icon-128.png"
+	},
+	"speeddial": {
+		"title": "Google Adsense Monitor",
+		"url": "http://adsense.google.com"
+	},	
+	"background": {
+		"page": "index.html"
+	},
+	"options_page": "options.html",
+	"web_accessible_resources": [
+	"COPYING",
+	"css/options.css",
+	"css/style.css",
+	"js/background.js",
+	"js/options.js",
+	"pix/icon-128.png",
+	"pix/icon-64.png",
+	"pix/icon-icr.png",
+	"pix/icon-reminder.png",
+	"pix/loading.gif"
+	],
+	"permissions": ["speeddial", "https://www.google.com/adsense/*", "storage"],
+	"content_security_policy": "script-src 'self'; object-src 'self';"
+}

@@ -31,8 +31,8 @@ Displays daily, monthly and / or total unpaid earnings data, as per your prefere
 
 ## Changelog
 
-Version 2.0 -
-New: Now supports Opera 15 (Chromium / Blink build).
+Version 2.0 -  
+New: Now supports Opera 15 (Chromium / Blink build).  
 
 Version 1.6 -  
 New: Extension icon for Mac / Retina displays.  
