@@ -29,19 +29,21 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    font-size:0.8em;
-    line-height:1.5;
 }
 
 html {
     height:100%;
 }
 body {
+	display: -webkit-flex;
+	display: flex;
+	-webkit-align-items: center;
+	align-items: center;
+	-webkit-justify-content: center;
+	height: 100%;
+	width: 100%;
     background:#fff;
-    color:#000000;
-    display:table;
-    height:100%;
-    width:100%;
+    color:#000;
 }
 span {
 	color: #000;
@@ -54,9 +56,8 @@ span.etype {
 	text-shadow: none;
 }
 #output {
-	display:table-cell;
-    text-align:center;
-    vertical-align:middle;
+	font-size: 2.2em;
+	text-align:center;	
 }
 #output img {
 	text-align:center;
@@ -108,26 +109,4 @@ dd {
 
 #rateSlides dt span.down {	
 	color:red;
-}
-
-/* Styles here are only applied in a "minimized" state */
-@media screen and (view-mode: minimized) {
-  output { font-size: 1.8em; }
-}
-
-/* Change the font size based on the available width */
-@media screen and (view-mode: minimized) and (min-width:6em) {
-    body { font-size:1em; }
-}
-@media screen and (view-mode: minimized) and (min-width:7.2em) {
-    body { font-size:1.2em; }
-}
-@media screen and (view-mode: minimized) and (min-width:9em) {
-    body { font-size:1.5em; }
-}
-@media screen and (view-mode: minimized) and (min-width:12em) {
-    body { font-size:2em; }
-}
-@media screen and (view-mode: minimized) and (min-width:18em) {
-    body { font-size:3em; }
 }
