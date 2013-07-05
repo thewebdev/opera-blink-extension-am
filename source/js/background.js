@@ -150,9 +150,9 @@ function extract(input) {
 	var eto, emo, etu;
 	var out = [];
 	
-	var edaily = parseInt(widget.preferences.edaily, 10);
-	var emonthly = parseInt(widget.preferences.emonthly, 10);
-	var etotal = parseInt(widget.preferences.etotal, 10);	
+	var edaily = parseInt((localStorage.getItem('edaily')), 10);
+	var emonthly = parseInt((localStorage.getItem('emonthly')), 10);
+	var etotal = parseInt((localStorage.getItem('etotal')), 10);	
 	
 	if (input) {
 	/*  parse the scraped page we got from Google */
@@ -192,7 +192,7 @@ function extract(input) {
 			
 			/* reset refresh timer to default setting */
 			clearInterval(timeIt);   
-			timeIt = setInterval(scrape, parseInt((widget.preferences.interval), 10) * 60 * 1000);	
+			timeIt = setInterval(scrape, parseInt((localStorage.getItem('interval')), 10) * 60 * 1000);
 			
 			if (edaily) {
 				/* Daily earnings data */
@@ -332,7 +332,7 @@ function refDial(cmd, out) {
 		show("data");
 		
 		/* set display delay between pair*/
-		slider = setInterval(startSlide, parseInt((widget.preferences.showfor), 10) * 1000);
+		slider = setInterval(startSlide, parseInt((localStorage.getItem('showfor')), 10) * 1000);
 		
 		/*  start displaying the data */
 		startSlide(out.length);
@@ -376,6 +376,19 @@ function refDial(cmd, out) {
 		
 		return;
 	} 
+	
+	if (cmd == "e101") {
+		/* indicate some error
+		   has occured */
+		
+		$("msg").firstChild.nodeValue = "Error 101: Couldn't initialize default values.";
+		
+		clearInterval(slider);	
+		hide("data");
+		show("wait");		
+		
+		return;
+	} 	
 }
 
 function startSlide(count) {
@@ -469,17 +482,86 @@ function startSlide(count) {
 	tempDd = null;
 }
 
+function reconfigure(e) {
+	/* 	Updates the speed dial when the 
+		user modifies & saves options. */
+
+	switch(e.key) {
+		case 'edaily': getData(); break;
+		case 'emonthly': setRefreshTimer(); break;
+		case 'etotal': setDisplayTimer(); break;
+	}
+}
+
 function init() {
 	/* some basic settings intialised here
 	   to get the extension running */
+
+	if (localStorage) {	
+	
+		/* 	1. INTERVAL
+			The 'interval' key in the preferences 
+			specifies the delay between updates.
+			
+			Default: 20 minutes
+			Unit: Minute 
+			User Customizable: NO */	
+		if (!localStorage.getItem('interval')) {
+			localStorage.setItem('interval', '15');
+		}
 		
+		/* 	2. SHOWFOR
+			Specifies the time each slide is shown.
+			
+			Default: 3 Seconds
+			Unit: Seconds 
+			User Customizable: NO */
+		if (!localStorage.getItem('showfor')) {
+			localStorage.setItem('showfor', '3');
+		}
+		
+		/* 	3. EDAILY
+			Indicates whether to display daily 
+			earnings.
+			
+			Default: 1
+			Type: Boolean (1 = TRUE, 0 = FALSE)
+			User Customizable: YES */		
+		if (!localStorage.getItem('edaily')) {
+			localStorage.setItem('edaily', '1');
+		}
+		
+		/* 	4. EDAILY
+			Indicates whether to display 
+			monthly earnings.
+			
+			Default: 1
+			Type: Boolean (1 = TRUE, 0 = FALSE)
+			User Customizable: YES */			
+		if (!localStorage.getItem('emonthly')) {
+			localStorage.setItem('emonthly', '1');
+		}
+
+		/* 	5. ETOTAL
+			Indicates whether to display total 
+			unpaid earnings.
+			
+			Default: 1
+			Type: Boolean (1 = TRUE, 0 = FALSE)
+			User Customizable: YES */			
+		if (!localStorage.getItem('etotal')) {
+			localStorage.setItem('etotal', '1');
+		}
+
+		timeIt = setInterval(scrape, parseInt((localStorage.getItem('interval')), 10) * 60 * 1000);	
+		scrape();
+		
+	} else {
+		refDial('e101');
+	}
 	
-	/* The 'interval' key in the preferences 
-	   specifies the delay between updates.
-	   Unit: minute */
-	timeIt = setInterval(scrape, parseInt((widget.preferences.interval), 10) * 60 * 1000);
-	
-	scrape();
+	/* monitors if options are updated and saved */
+	window.addEventListener('storage', reconfigure, false);	
 }
 
 /*  monitor and inform when HTML file is ready */

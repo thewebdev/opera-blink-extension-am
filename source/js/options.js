@@ -75,14 +75,15 @@ function apply() {
 	}
 	
 	/* save changes */
-	widget.preferences.edaily = checketo;
-	widget.preferences.emonthly = checkemo;
-	widget.preferences.etotal = checketu;
-	
-	status("All changes saved.");
-
-	/* reload dial with new settings */		
-	opera.extension.bgProcess.init();	
+	if (localStorage) {
+		localStorage.setItem('edaily', checketo);
+		localStorage.setItem('emonthly', checkemo);
+		localStorage.setItem('etotal', checketu);
+		
+		status("All changes saved.");
+	} else {
+		status("Error 202: Couldn't save changes.");
+	}
 	
 	return;
 }
@@ -91,32 +92,26 @@ function load() {
 	/* Loads the saved values and displays 
 	   it to the user for making changes. */ 
 	
-	var edaily = parseInt(widget.preferences.edaily, 10);
-	var emonthly = parseInt(widget.preferences.emonthly, 10);
-	var etotal = parseInt(widget.preferences.etotal, 10);
+	if (localStorage) {
+		if (localStorage.getItem('edaily')) {
+			var edaily = parseInt((localStorage.getItem('edaily')), 10);
+		}
+		
+		if (localStorage.getItem('emonthly')) {
+			var emonthly = parseInt((localStorage.getItem('emonthly')), 10);
+		}
+		
+		if (localStorage.getItem('etotal')) {
+			var etotal = parseInt((localStorage.getItem('etotal')), 10);
+		}
+	} else {
+		status("Error 201: Couldn't load default values.");
+		return;	
+	}
 	
 	if (edaily) { document.input.eto.checked = true; } 
 	if (emonthly) { document.input.emo.checked = true; } 
 	if (etotal) {document.input.etu.checked = true;	} 
-}
-
-function submit() {
-	/* When ENTER key is pressed on any form input,
-	   the form got submitted and resulted in a 
-	   page reload. However, it seems this form
-	   reload browser quirk, sometimes doesn't
-	   happen if there are more than one
-	   input element. Since options.html now
-	   has more than 1 input element, this event
-	   doesn't seem to be triggering. This code may
-	   no longer be necessary, but since I am 
-	   feeling lazy to test this quirk more 
-	   thoroughly this remains for now. */
-	   
-	if (document.input.remind.value) {
-		addNote();
-	}
-	return false;
 }
 
 function init() {
