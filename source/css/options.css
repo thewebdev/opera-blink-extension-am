@@ -23,24 +23,28 @@
 	Email: thewebdev@myopera.com  */
 	
 /* RESET */
+
 body {
 	font-family:"Helvetica Neue", "Free Sans", Arial, Helvetica, sans-serif;
     font-size:0.7em;
-    line-height:1.5;	
+    line-height:1.5;
+	min-width: 700px;
+	max-width: 900px;
+	margin: 2px auto;	
 }
+
 label {
 	font-weight: bold;
 }
 h1 {
-	margin: 1px;
 	text-align:center;
 	font-size:1.5em;
 	text-transform: uppercase;
 }
 h2 {
-	margin: 1px;
+	margin: 15px;
 	text-align:left;
-	font-size:1.2em;
+	font-size:1.5em;
 }
 a:link, a:visited, a:active {
 	margin-right: 4px;
@@ -50,9 +54,53 @@ a:link, a:visited, a:active {
 	font-weight: bold;
 	border: none;
 }
-#options {
-	width: 450px;
+ul {
+	margin: 5px 0px;
+	padding: 0px;
 }
+
+ul li {	
+	list-style-type: none;
+	margin: 5px 0px;
+	color: #10600D;
+	text-align:right;
+	text-transform: uppercase;	
+}
+
+#links a:link, #links a:visited, #links a:active {
+	color: #0644D4;
+	text-decoration:none;
+	font-weight: bold;	
+}
+
+#contain {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-box-pack: center;
+	-webkit-box-align: center;
+}
+
+header {
+	margin-top: 15px;
+}
+
+#settings{
+	display: -webkit-box;
+	-webkit-box-orient: horizontal;
+	margin-top: 10px;
+}
+
+#links {
+	-webkit-box-flex: 1;
+	padding: 15px 10px;
+}
+
+#page {
+	border: thin dotted #ADADAD;
+	border-radius: 15px;
+	background-color: #F7F7F7;
+}
+
 #msg {
 	display: none;
 	margin: 1px;
@@ -75,10 +123,5 @@ a:link, a:visited, a:active {
 .mid {
 	margin: 1px;
 	padding: 5px;
-	text-align: center;
-}
-#web {
-	margin: 1px;
-	padding: 5px;	
 	text-align: center;
 }

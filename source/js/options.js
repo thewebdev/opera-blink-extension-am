@@ -114,6 +114,10 @@ function load() {
 	if (etotal) {document.input.etu.checked = true;	} 
 }
 
+function submit() {
+	return false;
+}
+
 function init() {
 	/* some basic settings intialised here */
 	

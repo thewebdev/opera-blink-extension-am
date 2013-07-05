@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <!--  
 	This file is part of Google Adsense Monitor. Google Adsense Monitor
 	is an Opera extension that lets you view updates to your latest 
@@ -23,49 +23,51 @@
 	Source code: https://github.com/thewebdev/opera-extension-am.git
 	Email: thewebdev@myopera.com
 -->
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
-<title>Google Adsense Monitor Options</title>
-<link href="css/options.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/options.js"></script>
+	<meta charset="utf-8" />
+	<title>Options: Google Adsense Monitor</title>
+	<link href="css/options.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/options.js"></script>
 </head>
 
 <body>
-<div id="options">
-	<h1>Google Adsense Monitor Preferences</h1>	
-	<div class="optval"></div>
-		<h2>Display:</h2>
-		<ul id="set"></ul>
-	<form name="input" id="input" action="javascript:void(0);">
-		<div class="optval">
-			&nbsp; &nbsp; &nbsp; &nbsp;
-			<input type="checkbox" name="eto" id="eto" />
-			<label for="eto">Daily Earnings</label>				
-			
-			&nbsp; &nbsp;
-			<input type="checkbox" name="emo" id="emo" />
-			<label for="emo">Monthly Earnings</label>
+	<div id="contain">
+	<header>
+		<h1>Google Adsense Monitor Options</h1>
+	</header>
+	<div id="settings">
+		<nav id="links">
+			<aside>
+				<img src="pix/icon-128.png" />
+			</aside>
+			<ul>			
+				<li><a href="http://adsensemonitor.tumblr.com/submit">Online Support</a></li>
+				<li><a href="COPYING">GPL license</a></li>
+			</ul>
+		</nav>
+		<div id="page">
+			<div id="msg">Loading</div>	
+			<form name="input" id="input" action="javascript:void(0);">
+				<h2>Display the following:</h2>
+				<div class="optval">
+					&nbsp; &nbsp;
+					<input type="checkbox" name="eto" id="eto" />
+					<label for="eto">Daily Earnings</label>				
+					
+					&nbsp; &nbsp;
+					<input type="checkbox" name="emo" id="emo" />
+					<label for="emo">Monthly Earnings</label>
 
-			&nbsp; &nbsp;
-			<input type="checkbox" name="etu" id="etu" />
-			<label for="etu">Total Unpaid Earnings</label>			
-		</div>		
-		<div class="optval mid">
-			<input type="button" id="apply" value="Save All Changes" />
+					&nbsp; &nbsp;
+					<input type="checkbox" name="etu" id="etu" />
+					<label for="etu">Total Unpaid Earnings</label>			
+				</div>		
+				<div class="optval mid">
+					<input type="button" id="apply" value="Save All Changes" />
+				</div>
+			</form>
 		</div>
-	</form>
-</div>
-<div id="msg">Loading</div>
-<div id="web">
-	<a href="http://adsensemonitor.tumblr.com/submit">(Online Support)</a>
-</div>
-<div class="mid"><br />
-	<a href="https://addons.opera.com/extensions/details/instant-currency-rates/">
-	<img src="/pix/icon-icr.png" width="48" height="48" alt="Instant Currency Rate" /></a>
-	<a href="https://addons.opera.com/extensions/details/the-reminder/">
-	<img src="/pix/icon-reminder.png" width="48" height="48" alt="The Reminder" /></a>
-</div>
-<div class="optval mid">Try these Opera Extensions too! </div>
+	</div>
 </body>
 </html>
