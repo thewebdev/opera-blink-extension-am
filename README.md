@@ -1,10 +1,12 @@
-# Google Adsense Monitor
+﻿# Google Adsense Monitor
 
 Google Adsense Monitor is an Opera extension that lets you view updates to your latest adsense earnings in an Opera Speed Dial.
+
+Note: This version of the extension is for Opera 15 (Chromium / Blink build).
 	
 	Download: https://addons.opera.com/extensions/details/google-adsense-monitor/
 	Website: http://adsensemonitor.tumblr.com/
-	Source: https://github.com/thewebdev/opera-extension-am.git
+	Source: https://github.com/thewebdev/opera-blink-extension-am.git
 	Email: thewebdev@myopera.com
 
 ## Features  
@@ -28,6 +30,9 @@ Displays daily, monthly and / or total unpaid earnings data, as per your prefere
 2. The upward and the downward swing (indicated by the green and red colour, respectively) of the earnings data is based on the comparison with the previous period's earning (i.e. today's earning is compared with yesterday's, and this month's earning is compared with last month's).
 
 ## Changelog
+
+Version 2.0 -
+New: Now supports Opera 15 (Chromium / Blink build).
 
 Version 1.6 -  
 New: Extension icon for Mac / Retina displays.  
