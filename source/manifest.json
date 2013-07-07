@@ -20,16 +20,21 @@
 	"options_page": "options.html",
 	"web_accessible_resources": [
 	"COPYING",
-	"css/options.css",
-	"css/style.css",
-	"js/background.js",
-	"js/options.js",
-	"pix/icon-128.png",
-	"pix/icon-64.png",
-	"pix/icon-icr.png",
-	"pix/icon-reminder.png",
-	"pix/loading.gif"
+		"css/options.css",
+		"css/style.css",
+		"js/background.js",
+		"js/options.js",
+		"pix/icon-128.png",
+		"pix/icon-64.png",
+		"pix/icon-icr.png",
+		"pix/icon-reminder.png",
+		"pix/loading.gif"
 	],
-	"permissions": ["speeddial", "https://www.google.com/adsense/*", "storage"],
+	"permissions": [
+		"speeddial", 
+		"https://www.google.com/adsense/*", 
+		"https://accounts.google.com/*",
+		"storage"
+	],
 	"content_security_policy": "script-src 'self'; object-src 'self';"
 }
