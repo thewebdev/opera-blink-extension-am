@@ -486,11 +486,7 @@ function reconfigure(e) {
 	/* 	Updates the speed dial when the 
 		user modifies & saves options. */
 
-	switch(e.key) {
-		case 'edaily': getData(); break;
-		case 'emonthly': setRefreshTimer(); break;
-		case 'etotal': setDisplayTimer(); break;
-	}
+	scrape();
 }
 
 function init() {
