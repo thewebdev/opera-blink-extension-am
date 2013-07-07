@@ -103,14 +103,14 @@ header {
 
 #msg {
 	display: none;
-	margin: 1px;
-	padding: 1px;
-	width: 450px;
+	margin: 5px;
+	padding: 4px;
 	color: #FFF;
+	font-size:1.2em;	
 	text-align: center;
 	font-weight: bold;
 	background: #BC0808;
-	border-radius: 4px;
+	border-radius: 3px;
 }
 #input label {
 	padding:2px;
