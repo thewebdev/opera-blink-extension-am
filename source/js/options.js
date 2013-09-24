@@ -1,5 +1,5 @@
 ﻿/*  This file is part of Google Adsense Monitor. Google Adsense Monitor
-	is an Opera extension that lets you view updates to your latest 
+	is an Opera 15+ extension that lets you view updates to your latest 
 	adsense earnings in an Opera Speed Dial.
 	
     Copyright (C) 2013 M Shabeer Ali
@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	
 	Website: http://adsensemonitor.tumblr.com/
-	Source code: https://github.com/thewebdev/opera-extension-am.git
+	Source code: https://github.com/thewebdev/opera-blink-extension-am.git
 	Email: thewebdev@myopera.com 
 */
 
