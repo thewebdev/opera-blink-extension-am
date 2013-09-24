@@ -56,7 +56,8 @@ function apply() {
 	/* Saves the changes permanently */
 	
 	var checketo, checkemo, checketu;
-
+	var i, d;
+	
 	checketo = document.input.eto.checked;
 	checketo = checketo ? 1 : 0;
 	
@@ -74,11 +75,48 @@ function apply() {
 		return;
 	}
 	
+	i = document.input.interval.value;
+	i = parseInt(i, 10);		
+
+	if (!i) { 
+		/* Validation - interval should be a number */
+		status("Error: Update interval should be a number");
+		return;
+	} else {
+		document.input.interval.value = i;
+	}
+	
+	if (i < 15) {
+		/* Validation - interval cannot be less than 15 */
+		status("Error: Update interval should be more than 15 minutes.");
+		return;			
+	}
+
+	d = document.input.delay.value;
+	d = parseInt(d, 10);
+	
+	if ((!d) && (d != 0)) { 
+		/* Validation - delay should be a number */
+		status("Error: Display delay should be a number");
+		return;
+	} else {
+		document.input.delay.value = d;
+	}
+	
+	if (d <= 0) {
+		/* Validation - delay cannot be less than 1 */
+		status("Error: Display delay can't be less than 1 second.");
+		return;			
+	}	
+	
 	/* save changes */
 	if (localStorage) {
 		localStorage.setItem('edaily', checketo);
 		localStorage.setItem('emonthly', checkemo);
 		localStorage.setItem('etotal', checketu);
+		
+		localStorage.setItem('interval', i);
+		localStorage.setItem('showfor', d);
 		
 		status("All changes saved.");
 	} else {
@@ -104,6 +142,14 @@ function load() {
 		if (localStorage.getItem('etotal')) {
 			var etotal = parseInt((localStorage.getItem('etotal')), 10);
 		}
+		
+		if (localStorage.getItem('interval')) {
+			var interval = parseInt((localStorage.getItem('interval')), 10);
+		}
+		
+		if (localStorage.getItem('showfor')) {
+			var showfor = parseInt((localStorage.getItem('showfor')), 10);
+		}
 	} else {
 		status("Error 201: Couldn't load default values.");
 		return;	
@@ -112,6 +158,9 @@ function load() {
 	if (edaily) { document.input.eto.checked = true; } 
 	if (emonthly) { document.input.emo.checked = true; } 
 	if (etotal) {document.input.etu.checked = true;	} 
+	
+	if (interval) {document.input.interval.value = interval; } 
+	if (showfor) {document.input.delay.value = showfor; } 
 }
 
 function submit() {
