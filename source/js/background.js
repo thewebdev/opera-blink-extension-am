@@ -24,6 +24,7 @@
 
 var timeIt = null; // data refresh timer
 var slider; // slide time delay
+var data; // scraped adsense page
 
 function $(v) {
 	/* DOM: identifies element */
@@ -262,7 +263,6 @@ function scrape() {
 	/* Scrape the mobile version of 
 	   Google Adsense Control Panel. */
 	
-	var data;
 	var url = "https://www.google.com/adsense/v3/m/home";
 	
 	refDial('wait');
@@ -486,7 +486,24 @@ function reconfigure(e) {
 	/* 	Updates the speed dial when the 
 		user modifies & saves options. */
 
-	scrape();
+	var gac = data;
+	switch(e.key) {
+		case 'interval': setRefreshTimer(); break;
+		case 'showfor': setDisplayTimer(); break;
+		case 'edaily': extract(gac); break;
+		case 'emonthly': extract(gac); break;
+		case 'etotal': extract(gac); break;
+	}
+}
+
+function setRefreshTimer() {
+	clearInterval(timeIt); 
+	timeIt = setInterval(scrape, parseInt((localStorage.getItem('interval')), 10) * 60 * 1000);
+}
+
+function setDisplayTimer() {
+	clearInterval(slider);
+	slider = setInterval(startSlide, parseInt((localStorage.getItem('showfor')), 10) * 1000);
 }
 
 function init() {
@@ -501,7 +518,7 @@ function init() {
 			
 			Default: 20 minutes
 			Unit: Minute 
-			User Customizable: NO */	
+			User Customizable: YES */	
 		if (!localStorage.getItem('interval')) {
 			localStorage.setItem('interval', '15');
 		}
@@ -511,7 +528,7 @@ function init() {
 			
 			Default: 3 Seconds
 			Unit: Seconds 
-			User Customizable: NO */
+			User Customizable: YES */
 		if (!localStorage.getItem('showfor')) {
 			localStorage.setItem('showfor', '3');
 		}
@@ -527,7 +544,7 @@ function init() {
 			localStorage.setItem('edaily', '1');
 		}
 		
-		/* 	4. EDAILY
+		/* 	4. EMONTHLY
 			Indicates whether to display 
 			monthly earnings.
 			
