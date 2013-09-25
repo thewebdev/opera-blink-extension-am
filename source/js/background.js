@@ -155,6 +155,8 @@ function extract(input) {
 	var emonthly = parseInt((localStorage.getItem('emonthly')), 10);
 	var etotal = parseInt((localStorage.getItem('etotal')), 10);	
 	
+	var slideshow = parseInt((localStorage.getItem('slideshow')), 10);
+	
 	if (input) {
 	/*  parse the scraped page we got from Google */
 		
@@ -212,8 +214,7 @@ function extract(input) {
 					dComp = "up";
 				}
 				
-				y = 'yesterday: ' + y;
-				eto = ['today', dComp, now, y];
+				eto = ['today', dComp, now, 'yesterday', y];
 				out.push(eto);
 			}
 			
@@ -236,8 +237,7 @@ function extract(input) {
 					mComp = "up";
 				}	
 
-				lm = 'last month: ' + lm;
-				emo = ['this month', mComp, tm, lm];
+				emo = ['this month', mComp, tm, 'last month', lm];
 				out.push(emo);
 			}
 			
@@ -252,7 +252,13 @@ function extract(input) {
 				out.push(etu);
 			}
 			
-			refDial('show', out);
+			/* check how the user wants data
+			   to be displayed. */
+			if (slideshow) {
+				refDial('slides', out);
+			} else {
+				refDial('showall', out);
+			}
 		}
 	}
 	
@@ -292,11 +298,12 @@ function refDial(cmd, out) {
 	/* Used to show the output
 	   in the speed dial. */
 	
-	if (cmd == "show") {
-		/* prepare the earning data
-		   for display */
+	if (cmd == "slides") {
+		/* Displays each data individually 
+		   in the speed dial as slides
+		   in a presentation. */
 		
-		var dt, dd;
+		var dt, dd, temp;
 		
 		clearInterval(slider);	
 		
@@ -320,8 +327,11 @@ function refDial(cmd, out) {
 			if (dd[o]) {
 				/*  reset css class */
 				dd[o].className = "";	
+				
 				/*  assign the new data */				
-				dd[o].innerHTML = out[o][3];
+				temp = '';
+				if (out[o][4]) { temp = ': ' + out[o][4]; }
+				dd[o].innerHTML = out[o][3] + temp;
 			}			
 		}
 		
@@ -338,6 +348,55 @@ function refDial(cmd, out) {
 		startSlide(out.length);
 		return;
 	}
+
+	if (cmd == "showall") {
+		/* Displays all the data in a 
+		   tabular view. */
+		
+		var dt, dd, temp;
+		
+		clearInterval(slider);	
+		
+		/* create the definition list
+		   structure used to show the data. */
+		createDl(out.length);
+		
+		/* set style to display as table */
+		$("rateSlides").className = "table-display";
+		
+		dt = $("rateSlides").getElementsByTagName('dt');
+		dd = $("rateSlides").getElementsByTagName('dd');
+		
+		for (var o = 0; o < out.length; o++) {
+			/*  add data */
+			
+			if (dt[o]) {
+				/*  reset css class */
+				dt[o].className = "current";
+				/*  assign the new data */
+				switch(out[o][0]) {
+					case 'today': temp = 'day: '; break;
+					case 'this month': temp = 'month: '; break;
+					case 'total': temp = 'total: '; break;
+				}
+				dt[o].innerHTML = '<span class="ttitle">' + temp + ' </span>';
+			} 
+			
+			if (dd[o]) {
+				/*  reset css class */
+				dd[o].className = "current";	
+				/*  assign the new data */				
+				temp = '';
+				if (out[o][4]) { temp = ' vs ' + out[o][4]; }
+				dd[o].innerHTML = '<span class="' + out[o][1] + '">' +  out[o][2] + '</span>' + temp;
+			}			
+		}
+		
+		hide("wait");
+		show("data");
+
+		return;
+	}	
 
 	if (cmd == "login") {
 		/* tell the user to login */
@@ -493,6 +552,7 @@ function reconfigure(e) {
 		case 'edaily': extract(gac); break;
 		case 'emonthly': extract(gac); break;
 		case 'etotal': extract(gac); break;
+		case 'slideshow': extract(gac); break;
 	}
 }
 
@@ -565,6 +625,17 @@ function init() {
 		if (!localStorage.getItem('etotal')) {
 			localStorage.setItem('etotal', '1');
 		}
+		
+		/* 	6. SLIDESHOW
+			Indicates whether to display data 
+			as an animated slideshow.
+			
+			Default: 1
+			Type: Boolean (1 = TRUE, 0 = FALSE)
+			User Customizable: YES */			
+		if (!localStorage.getItem('slideshow')) {
+			localStorage.setItem('slideshow', '1');
+		}		
 
 		timeIt = setInterval(scrape, parseInt((localStorage.getItem('interval')), 10) * 60 * 1000);	
 		scrape();
