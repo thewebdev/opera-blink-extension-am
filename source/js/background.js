@@ -70,6 +70,7 @@ function createDl(kids) {
 	if ($("rateSlides")) {
 		/*  if dl node exists */
 		
+		$("rateSlides").className = '';
 		temp = $("rateSlides").getElementsByTagName('dt');
 		
 		if (temp.length === kids) {
@@ -375,9 +376,9 @@ function refDial(cmd, out) {
 				dt[o].className = "current";
 				/*  assign the new data */
 				switch(out[o][0]) {
-					case 'today': temp = 'day: '; break;
-					case 'this month': temp = 'month: '; break;
-					case 'total': temp = 'total: '; break;
+					case 'today': temp = 'day'; break;
+					case 'this month': temp = 'month'; break;
+					case 'total': temp = 'total'; break;
 				}
 				dt[o].innerHTML = '<span class="ttitle">' + temp + ' </span>';
 			} 
