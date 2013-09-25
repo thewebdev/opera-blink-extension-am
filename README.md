@@ -21,7 +21,7 @@ The colour of the earning data indicate whether your earnings have improved or n
 Once you have logged in, Google Adsense Monitor downloads new Adsense earnings data every 15 minutes.  
 
 4. **Customisable**  
-Displays daily, monthly and / or total unpaid earnings data, as per your preference.  
+Change display timings, data update intervals and options to view daily, monthly and / or total unpaid earnings data, as per your preference.    
 
 ## Usage
 
@@ -30,6 +30,9 @@ Displays daily, monthly and / or total unpaid earnings data, as per your prefere
 2. The upward and the downward swing (indicated by the green and red colour, respectively) of the earnings data is based on the comparison with the previous period's earning (i.e. today's earning is compared with yesterday's, and this month's earning is compared with last month's).
 
 ## Changelog
+
+*Version 2.2* -  
+New: Option to display all earnings data in a tabular view.
 
 *Version 2.1* -  
 New: Options to control display & data refresh timings.  
