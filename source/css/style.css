@@ -134,11 +134,12 @@ dl.table-display {
 	padding: 5px;
 	border-top: 1px solid #999;
 	font-size: 0.6em;
+	text-align: left;
 }
 
 .table-display dt span.ttitle {
 	color: #A4A4A4;
-	font-size:0.8em;
+	font-size:0.6em;
 	text-transform: uppercase;
 	text-shadow: none;
 }
@@ -148,50 +149,7 @@ dl.table-display {
 	width: 61%;
 	margin: 0;
 	border-top: 1px solid #999;
-	font-size: 0.6em;
+	font-size: 0.5em;
 	font-weight: normal;
 	text-transform: none;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
