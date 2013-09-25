@@ -55,7 +55,7 @@ function status(msg) {
 function apply() {
 	/* Saves the changes permanently */
 	
-	var checketo, checkemo, checketu;
+	var checketo, checkemo, checketu, checkass;
 	var i, d;
 	
 	checketo = document.input.eto.checked;
@@ -66,6 +66,9 @@ function apply() {
 	
 	checketu = document.input.etu.checked;
 	checketu = checketu ? 1 : 0;
+	
+	checkass = document.input.ass.checked;
+	checkass = checkass ? 1 : 0;	
 
 	/* Validate - Atleast one item 
 	   needs to be displayed. */
@@ -114,9 +117,12 @@ function apply() {
 		localStorage.setItem('edaily', checketo);
 		localStorage.setItem('emonthly', checkemo);
 		localStorage.setItem('etotal', checketu);
+		localStorage.setItem('slideshow', checkass);
+		if (checkass) {
+			localStorage.setItem('showfor', d);
+		}
 		
 		localStorage.setItem('interval', i);
-		localStorage.setItem('showfor', d);
 		
 		status("All changes saved.");
 	} else {
@@ -150,6 +156,10 @@ function load() {
 		if (localStorage.getItem('showfor')) {
 			var showfor = parseInt((localStorage.getItem('showfor')), 10);
 		}
+		
+		if (localStorage.getItem('slideshow')) {
+			var slideshow = parseInt((localStorage.getItem('slideshow')), 10);
+		}		
 	} else {
 		status("Error 201: Couldn't load default values.");
 		return;	
@@ -159,8 +169,23 @@ function load() {
 	if (emonthly) { document.input.emo.checked = true; } 
 	if (etotal) {document.input.etu.checked = true;	} 
 	
+	if (slideshow) {document.input.ass.checked = true;	}	
+	
 	if (interval) {document.input.interval.value = interval; } 
 	if (showfor) {document.input.delay.value = showfor; } 
+}
+
+function disable() {
+	var checked;
+	
+	checked = document.input.ass.checked;
+	checked = checked ? 1 : 0;
+	
+	if (!checked) {
+		document.input.delay.disabled = true;
+	} else {
+		document.input.delay.disabled = false;
+	}
 }
 
 function submit() {
@@ -173,6 +198,7 @@ function init() {
 	/* monitor for button clicks */
 	$('input').addEventListener('submit', submit, false);
 	$('apply').addEventListener('click', apply, false);
+	$('ass').addEventListener('click', disable, false);	
 	
 	load();
 }
