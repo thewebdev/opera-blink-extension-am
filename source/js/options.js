@@ -26,6 +26,8 @@
 
 (function () {
     "use strict";
+	
+	update = 0;
 
     function $(v) {
         if (document.getElementById(v)) {
@@ -60,7 +62,7 @@
     function apply() {
         /* Saves the changes permanently */
         
-        var checketo, checkemo, checketu, checkass, i, d;
+        var checketo, checkemo, checketu, checkass, i, d, arc, luc;
         
         checketo = document.input.eto.checked;
         checketo = checketo ? 1 : 0;
@@ -73,6 +75,9 @@
         
         checkass = document.input.ass.checked;
         checkass = checkass ? 1 : 0;
+		
+		checkalc = document.input.alc.checked;
+		checkalc = checkalc ? 1 : 0;		
     
         /* Validate - Atleast one item 
            needs to be displayed. */
@@ -122,11 +127,30 @@
             localStorage.setItem('emonthly', checkemo);
             localStorage.setItem('etotal', checketu);
             localStorage.setItem('slideshow', checkass);
+			localStorage.setItem('interval', i);
+			
             if (checkass) {
                 localStorage.setItem('showfor', d);
             }
-            
-            localStorage.setItem('interval', i);
+	
+			if (checkalc) {
+			
+				arc = document.input.first.value;
+				luc = document.input.second.value;
+				
+				// Adsense Report Currency
+				localStorage.setItem('arc', arc);
+				
+				//Local User Currency
+				localStorage.setItem('luc', luc);
+				
+				opera.extension.bgProcess.scrape();
+			}
+			
+			if (checkalc !== update) {
+				update = checkalc;
+				opera.extension.bgProcess.scrape();
+			}			
             
             status("All changes saved.");
         } else {
@@ -140,7 +164,7 @@
         /* Loads the saved values and displays 
            it to the user for making changes. */
         
-        var edaily, emonthly, etotal, interval, showfor, slideshow;
+        var edaily, emonthly, etotal, interval, showfor, slideshow, convert;
         
         if (localStorage) {
             if (localStorage.getItem('edaily')) {
@@ -166,6 +190,10 @@
             if (localStorage.getItem('slideshow')) {
                 slideshow = parseInt((localStorage.getItem('slideshow')), 10);
             }
+			
+            if (localStorage.getItem('convert')) {
+                convert = parseInt((localStorage.getItem('convert')), 10);
+            }			
         } else {
             status("Error 201: Couldn't load default values.");
             return;
@@ -179,15 +207,41 @@
         
         if (interval) {document.input.interval.value = interval; }
         if (showfor) {document.input.delay.value = showfor; }
+		
+		if (convert) {
+			update = 1;
+			document.input.alc.checked = true; 
+		}
+
+		$('first').value = widget.preferences.arc;
+		$('second').value = widget.preferences.luc;
+		
+		disable();
+		nocurrency();		
     }
+
+	function nocurrency() {
+		var check;
+		
+		check = document.input.alc.checked;
+		check = check ? 1 : 0;
+		
+		if (check) {
+			document.input.first.disabled = false;
+			document.input.second.disabled = false;	
+		} else {
+			document.input.first.disabled = true;
+			document.input.second.disabled = true;
+		}
+	}
     
     function disable() {
-        var checked;
+        var check;
         
-        checked = document.input.ass.checked;
-        checked = checked ? 1 : 0;
+        check = document.input.ass.checked;
+        check = check ? 1 : 0;
         
-        if (!checked) {
+        if (!check) {
             document.input.delay.disabled = true;
         } else {
             document.input.delay.disabled = false;
