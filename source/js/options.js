@@ -22,7 +22,9 @@
 	Email: thewebdev@myopera.com 
 */
 
-/*global document: false, clearTimeout: false, setTimeout: false, localStorage: false */
+/*global document: false, clearTimeout: false, setTimeout: false, localStorage: false, chrome: false */
+
+"use strict";
 
 var update = 0;
 
@@ -56,6 +58,34 @@ function status(msg) {
 	}, 7000);
 }
 
+function nocurrency() {
+	var check;
+	
+	check = document.input.alc.checked;
+	check = check ? 1 : 0;
+	
+	if (check) {
+		document.input.first.disabled = false;
+		document.input.second.disabled = false;
+	} else {
+		document.input.first.disabled = true;
+		document.input.second.disabled = true;
+	}
+}
+
+function disable() {
+	var check;
+	
+	check = document.input.ass.checked;
+	check = check ? 1 : 0;
+	
+	if (!check) {
+		document.input.delay.disabled = true;
+	} else {
+		document.input.delay.disabled = false;
+	}
+}
+
 function apply() {
 	/* Saves the changes permanently */
 	
@@ -74,7 +104,7 @@ function apply() {
 	checkass = checkass ? 1 : 0;
 	
 	checkalc = document.input.alc.checked;
-	checkalc = checkalc ? 1 : 0;		
+	checkalc = checkalc ? 1 : 0;
 
 	/* Validate - Atleast one item 
 	   needs to be displayed. */
@@ -149,7 +179,7 @@ function apply() {
 		if (checkalc !== update) {
 			update = checkalc;
 			chrome.extension.getBackgroundPage().scrape();
-		}			
+		}
 		
 		status("All changes saved.");
 	} else {
@@ -196,11 +226,11 @@ function load() {
 
 		if (localStorage.getItem('arc')) {
 			arc = localStorage.getItem('arc');
-		}	
+		}
 		
 		if (localStorage.getItem('luc')) {
 			luc = localStorage.getItem('luc');
-		}			
+		}
 	} else {
 		status("Error 201: Couldn't load default values.");
 		return;
@@ -217,42 +247,14 @@ function load() {
 	
 	if (convert) {
 		update = 1;
-		document.input.alc.checked = true; 
+		document.input.alc.checked = true;
 	}
 
 	$('first').value = arc;
 	$('second').value = luc;
 	
 	disable();
-	nocurrency();		
-}
-
-function nocurrency() {
-	var check;
-	
-	check = document.input.alc.checked;
-	check = check ? 1 : 0;
-	
-	if (check) {
-		document.input.first.disabled = false;
-		document.input.second.disabled = false;	
-	} else {
-		document.input.first.disabled = true;
-		document.input.second.disabled = true;
-	}
-}
-
-function disable() {
-	var check;
-	
-	check = document.input.ass.checked;
-	check = check ? 1 : 0;
-	
-	if (!check) {
-		document.input.delay.disabled = true;
-	} else {
-		document.input.delay.disabled = false;
-	}
+	nocurrency();
 }
 
 function submit() {
