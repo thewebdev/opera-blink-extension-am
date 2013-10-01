@@ -23,15 +23,18 @@
 	Email: thewebdev@myopera.com */
 
 /*jslint plusplus: true, continue: true*/
-/*global document: false, clearTimeout: false, clearInterval: false, setTimeout: false, setInterval: false, localStorage: false, XMLHttpRequest: false, window: false */
+/*global document: false, clearTimeout: false, clearInterval: false, setTimeout: false, setInterval: false, localStorage: false, XMLHttpRequest: false, window: false, console: false */
 
-var timeIt, slider, data;
+"use strict";
+var timeIt, slider, data, rate;
 	// timeIt - data refresh timer
 	// slider - slide time delay
 	// data - scraped adsense page
+    // parsed currency rate
 
 function $(v) {
 	/* DOM: identifies element */
+    
 	if (document.getElementById(v)) {
 		return document.getElementById(v);
 	}
@@ -53,6 +56,14 @@ function hide(id) {
 
 function show(id) {
 	$(id).style.display = 'block';
+}
+
+function trueRound(value) {
+/*  Original code from stackoverflow.com 
+	Rounds a float to specified number of decimal places */
+
+	var digits = 2;
+    return (Math.round((value * Math.pow(10, digits)).toFixed(digits - 1)) / Math.pow(10, digits)).toFixed(digits);
 }
 
 function createDl(kids) {
@@ -391,11 +402,6 @@ function refDial(cmd, out) {
 	}
 }
 
-function setRefreshTimer(time) {
-	clearInterval(timeIt);
-	timeIt = setInterval(scrape, time * 60 * 1000);
-}
-
 function setDisplayTimer() {
 	clearInterval(slider);
 	slider = setInterval(startSlide, parseInt((localStorage.getItem('showfor')), 10) * 1000);
@@ -407,7 +413,7 @@ function extract(input) {
 	   scrape the earnings data, else ask
 	   user to log in. */
 	   
-	var login, div, gcode, now, y, tm, lm, dComp, mComp, tue, te, eto, emo, etu, out, edaily, emonthly, etotal, slideshow;
+	var login, div, gcode, now, y, tm, lm, dComp, mComp, tue, te, eto, emo, etu, out, edaily, emonthly, etotal, slideshow, convert;
 	
 	out = [];
 	edaily = parseInt((localStorage.getItem('edaily')), 10);
@@ -415,7 +421,8 @@ function extract(input) {
 	etotal = parseInt((localStorage.getItem('etotal')), 10);
 	
 	slideshow = parseInt((localStorage.getItem('slideshow')), 10);
-	
+	convert = parseInt((localStorage.getItem('convert')), 10);
+    
 	if (input) {
 	/*  parse the scraped page we got from Google */
 		
@@ -471,6 +478,26 @@ function extract(input) {
 					dComp = "up";
 				}
 				
+                /* Currency conversion */
+				if (convert) {
+					now = now.trim();
+					y = y.trim();
+					
+					// remove dollar / euro symbol
+					now = now.slice(1);
+					y = y.slice(1);
+					
+					// convert to local currency
+					now = parseFloat(now) * rate;
+					y = parseFloat(y) * rate;
+					
+					// roundoff to 2 decimals
+					now = trueRound(now);
+					y = trueRound(y);
+					
+					now = String(now);
+					y = String(y);
+				}
 				eto = ['today', dComp, now, 'yesterday', y];
 				out.push(eto);
 			}
@@ -493,6 +520,27 @@ function extract(input) {
 				} else {
 					mComp = "up";
 				}
+                
+                /* Currency conversion */
+				if (convert) {
+					tm = tm.trim();
+					lm = lm.trim();
+					
+					// remove dollar / euro symbol
+					tm = tm.slice(1);
+					lm = lm.slice(1);
+					
+					// convert to local currency
+					tm = parseFloat(tm) * rate;
+					lm = parseFloat(lm) * rate;
+					
+					// roundoff to 2 decimals
+					tm = trueRound(tm);
+					lm = trueRound(lm);
+					
+					tm = String(tm);
+					lm = String(lm);
+				}
 				
 				emo = ['this month', mComp, tm, 'last month', lm];
 				out.push(emo);
@@ -505,6 +553,22 @@ function extract(input) {
 				
 				tue = div.querySelectorAll('ul.metrics-list li:first-of-type span.value');
 				te = tue[1].firstChild.nodeValue;
+                
+				if (convert) {
+					te = te.trim();
+					
+					// remove dollar / euro symbol
+					te = te.slice(1);
+					
+					// convert to local currency
+					te = parseFloat(te) * rate;
+					
+					// roundoff to 2 decimals
+					te = trueRound(te);
+					
+					te = String(te);
+				}
+                
 				etu = ['total', 'up', te, 'unpaid earnings'];
 				out.push(etu);
 			}
@@ -522,7 +586,70 @@ function extract(input) {
 	return;
 }
 
-function scrape() {
+function converter(file, arc, luc) {
+	/* Currency conversion */
+	
+	var csv, rates;
+    csv = file.split(/\r?\n/);
+	
+	if (arc === 'USD') {
+		rates = csv[0].split(',');
+		rate = parseFloat(rates[1]);
+	}
+	
+	if (arc === 'EUR') {
+		rates = csv[0].split(',');
+		rates = rates.concat(csv[1].split(','));
+		rate = parseFloat(rates[3]) / parseFloat(rates[1]);
+	}
+	
+	return;
+}
+
+function getRates() {
+	/* Get currency rate from Yahoo! */
+	
+	var csvfile, query, url, arc, luc, ext;
+    
+    refDial('wait');
+
+    url = 'http://download.finance.yahoo.com/d/quotes.csv?f=sl1&e=.cs&s=';
+    arc = localStorage.getItem('arc');
+	luc = localStorage.getItem('luc');
+	
+	if (arc === 'USD') {
+		query = arc + luc + '=X';
+	}
+	
+	if (arc === 'EUR') {
+		query = 'USDEUR=X&s=USD' + luc + '=X';
+	}
+	
+	url = url + query;
+	
+	ext = new XMLHttpRequest();
+
+	ext.open('GET', url, true);
+	
+	ext.onreadystatechange = function (event) {
+		if (this.readyState === 4) {
+			if (this.status === 200 && this.responseText) {
+				csvfile = this.responseText;
+				converter(csvfile, arc, luc);
+			} else {
+				/* possible network error -
+				   tell the user. */
+				console.log("Yahoo");
+				refDial('hang');
+			}
+		}
+	};
+
+	ext.send();
+	return;
+}
+
+function getReport() {
 	/* Scrape the mobile version of 
 	   Google Adsense Control Panel. */
 	
@@ -542,7 +669,7 @@ function scrape() {
 			} else {
 				/* possible network error -
 				   tell the user. */
-				
+				console.log("Google");
 				refDial('hang');
 			}
 		}
@@ -550,6 +677,23 @@ function scrape() {
 
 	ext.send();
 	return data;
+}
+
+function scrape() {
+	/* get the data */
+	
+	var convert = parseInt((localStorage.getItem('convert')), 10);
+	if (convert) {
+		getRates();
+	}
+	
+	getReport();
+	return;
+}
+
+function setRefreshTimer(time) {
+	clearInterval(timeIt);
+	timeIt = setInterval(scrape, time * 60 * 1000);
 }
 
 function reconfigure(e) {
@@ -586,11 +730,12 @@ function init() {
 	if (localStorage) {
 	
 		/*  1. INTERVAL
-			The 'interval' key in the preferences 
-			specifies the delay between updates.
+			Specifies the time when data 
+            should be refreshed and updated.
 			
-			Default: 20 minutes
-			Unit: Minute 
+			Default: 20
+			Unit: Minute
+            Type: Integer
 			User Customizable: YES */
 		if (!localStorage.getItem('interval')) {
 			localStorage.setItem('interval', '15');
@@ -599,8 +744,9 @@ function init() {
 		/*  2. SHOWFOR
 			Specifies the time each slide is shown.
 			
-			Default: 3 Seconds
-			Unit: Seconds 
+			Default: 3
+			Unit: Seconds
+            Type: Integer
 			User Customizable: YES */
 		if (!localStorage.getItem('showfor')) {
 			localStorage.setItem('showfor', '3');
@@ -648,6 +794,39 @@ function init() {
 			User Customizable: YES */
 		if (!localStorage.getItem('slideshow')) {
 			localStorage.setItem('slideshow', '1');
+		}
+        
+		/*  7. CONVERT
+			Indicates whether currency conversion
+            is required.
+			
+			Default: 0
+			Type: Boolean (1 = TRUE, 0 = FALSE)
+			User Customizable: YES */
+		if (!localStorage.getItem('convert')) {
+			localStorage.setItem('convert', '0');
+		}
+        
+		/*  8. ARC
+			Stores 'Adsense Report Currency' when 
+            currency conversion is enabled.
+			
+			Default: "USD"
+			Type: String
+			User Customizable: YES */
+		if (!localStorage.getItem('arc')) {
+			localStorage.setItem('arc', 'USD');
+		}
+        
+		/*  9. LUC
+			Stores 'Local User Currency' when
+            currency conversion is enabled.
+			
+			Default: "GBP"
+			Type: String
+			User Customizable: YES */
+		if (!localStorage.getItem('luc')) {
+			localStorage.setItem('luc', 'GBP');
 		}
 		
 		timeIt = setInterval(scrape, parseInt((localStorage.getItem('interval')), 10) * 60 * 1000);
