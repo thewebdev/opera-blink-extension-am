@@ -34,6 +34,9 @@ Change display timings, data update intervals, options to view your earnings in 
 
 ## Changelog
 
+*Version 15.11* -  
+Updated: Added AZN to currency list.  
+
 *Version 15.10* -  
 New: (Experimental) Automatically converts earnings into local currency from USD or EUR.  
 New: Versioning process. See Issue #1  
