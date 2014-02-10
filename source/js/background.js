@@ -3,7 +3,7 @@
 	adsense earnings in an Opera Speed Dial.
 
 	
-    Copyright (C) 2013 M Shabeer Ali
+    Copyright (C) 2013 - 2014 M Shabeer Ali
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 	
 	Website: http://adsensemonitor.tumblr.com/
 	Source code: https://github.com/thewebdev/opera-blink-extension-am.git
-	Email: thewebdev@myopera.com */
+	Email: thewebdev@yandex.com */
 
 /*jslint plusplus: true, continue: true*/
 /*global document: false, clearTimeout: false, clearInterval: false, setTimeout: false, setInterval: false, localStorage: false, XMLHttpRequest: false, window: false, console: false */
