@@ -26,11 +26,15 @@
 /*global document: false, clearTimeout: false, clearInterval: false, setTimeout: false, setInterval: false, localStorage: false, XMLHttpRequest: false, window: false, console: false */
 
 "use strict";
-var timeIt, slider, data, rate;
-	// timeIt - data refresh timer
-	// slider - slide time delay
-	// data - scraped adsense page
-    // parsed currency rate
+
+var timeIt = null; // data refresh timer
+var slider; // slide time delay
+var data; // raw adsense data
+var etable; // earnings table page
+var out; // output data
+var rate; // parsed currency rates
+var totality = false; // flag for total earning
+var allowed = false; // flag for login check
 
 function $(v) {
 	/* DOM: identifies element */
@@ -240,7 +244,17 @@ function startSlide(count) {
 	tempDd = null;
 }
 
-function refDial(cmd, out) {
+function setRefreshTimer(time) {
+	clearInterval(timeIt);
+	timeIt = setInterval(scrape, time * 60 * 1000);
+}
+
+function setDisplayTimer() {
+	clearInterval(slider);
+	slider = setInterval(startSlide, parseInt((localStorage.getItem('showfor')), 10) * 1000);
+}
+
+function refDial(cmd) {
 	/* Used to show the output
 	   in the speed dial. */
 	
@@ -255,7 +269,8 @@ function refDial(cmd, out) {
 		
 		/* create the definition list
 		   structure used to show the data. */
-		createDl(out.length);
+		
+        createDl(out.length);
 		
 		dt = $("rateSlides").getElementsByTagName('dt');
 		dd = $("rateSlides").getElementsByTagName('dd');
@@ -288,10 +303,16 @@ function refDial(cmd, out) {
 		show("data");
 		
 		/* set display delay between pair*/
-		slider = setInterval(startSlide, parseInt((localStorage.getItem('showfor')), 10) * 1000);
+		setDisplayTimer();
 		
 		/*  start displaying the data */
 		startSlide(out.length);
+        
+        /*  reset timer in case we are
+            recovering from login or
+            network error */
+        
+        setRefreshTimer(parseInt((localStorage.getItem('interval')), 10));
 		return;
 	}
 
@@ -345,14 +366,20 @@ function refDial(cmd, out) {
 		
 		hide("wait");
 		show("data");
-
+        
+        /*  reset timer in case we are
+            recovering from login or
+            network error */
+        
+        setRefreshTimer(parseInt((localStorage.getItem('interval')), 10));
 		return;
 	}
 	
 	if (cmd === "login") {
 		/* tell the user to login */
-			
-		$("msg").firstChild.nodeValue = "please login";
+		
+        $("indicator").setAttribute("src", "../pix/wait.gif");
+		$("msg").innerHTML = "please login" + "<br \\>" + "(and wait 2 minutes)";
 
 		clearInterval(slider);
 		
@@ -366,7 +393,8 @@ function refDial(cmd, out) {
 		/* used to indicate that an
 		   update of data is underway */
 
-		$("msg").firstChild.nodeValue = "updating";
+        $("indicator").setAttribute("src", "../pix/loading.gif");
+		$("msg").innerHTML = "updating";
 
 		clearInterval(slider);
 		hide("data");
@@ -379,7 +407,8 @@ function refDial(cmd, out) {
 		/* indicate some error
 		   has occured */
 
-		$("msg").firstChild.nodeValue = "Possible network error. Will retry again later.";
+        $("indicator").setAttribute("src", "../pix/wait.gif");
+		$("msg").innerHTML = "possible network error" + "<br \\>" + "(will retry again later)";
 		
 		clearInterval(slider);
 		hide("data");
@@ -391,8 +420,9 @@ function refDial(cmd, out) {
 	if (cmd === "e101") {
 		/* indicate some error
 		   has occured */
-		
-		$("msg").firstChild.nodeValue = "Error 101: Couldn't initialize default values.";
+		  
+        $("indicator").setAttribute("src", "../pix/wait.gif");
+		$("msg").innerHTML = "Error 101: Couldn't initialize default values.";
 		
 		clearInterval(slider);
 		hide("data");
@@ -402,186 +432,155 @@ function refDial(cmd, out) {
 	}
 }
 
-function setDisplayTimer() {
-	clearInterval(slider);
-	slider = setInterval(startSlide, parseInt((localStorage.getItem('showfor')), 10) * 1000);
-}
-
-function extract(input) {
-	/* Checks if user has logged into Google
-	   Adsense control panel. If logged in,
-	   scrape the earnings data, else ask
-	   user to log in. */
+function extract() {
+/*  Extract and format the raw 
+    data for our use. */
 	   
-	var login, div, gcode, now, y, tm, lm, dComp, mComp, tue, te, eto, emo, etu, out, edaily, emonthly, etotal, slideshow, convert;
+	var earnings, now, y, tm, lm, dComp, mComp, tue, te, eto, emo, etu, edaily, emonthly, etotal, slideshow, convert, temp, div;
 	
-	out = [];
-	edaily = parseInt((localStorage.getItem('edaily')), 10);
+    out = [];
+	
+    edaily = parseInt((localStorage.getItem('edaily')), 10);
 	emonthly = parseInt((localStorage.getItem('emonthly')), 10);
 	etotal = parseInt((localStorage.getItem('etotal')), 10);
 	
 	slideshow = parseInt((localStorage.getItem('slideshow')), 10);
 	convert = parseInt((localStorage.getItem('convert')), 10);
     
-	if (input) {
-	/*  parse the scraped page we got from Google */
-		
-		/* extract <body> element from scraped page */
-		gcode = input.substring(input.indexOf("<body>") + 7, input.indexOf("</body>"));
-		
-		/* We extract data based on the id's. 
-		   To do this efficiently, we use
-		   querySelector(), which works on DOM, 
-		   elements and document fragments. So we
-		   create an element, append the elements 
-		   from the scraped page and search for
-		   known id's using querySelector(). */
-		   
-		div = e('div');
-		div.innerHTML = input;
-		
-		/* the login form has an id called 'gaia_loginform' */
-		login = div.querySelector("#gaia_loginform");
-		
-		if (login) {
-			/* login form detected */
+    earnings = data.earnings;
+	
+	if (earnings) {
+		refDial('wait');
 			
-			/* inform user to login */
-			refDial('login');
-			
-			/* reset refresh timer to check every 2 
-			   minute if user has logged in */
-			setRefreshTimer(2);
-			
-		} else {
-			/* user is logged in */
-			
-			refDial('wait');
-			
-			/* reset refresh timer to default setting */
-			setRefreshTimer(parseInt((localStorage.getItem('interval')), 10));
-			
-			if (edaily) {
-				/* Daily earnings data */
-				
-				/* extract the earning data using the 
-				   obvious id's */
-				   
-				now = div.querySelector("#earnings-today").firstChild.nodeValue;
-				y = div.querySelector("#earnings-yesterday").firstChild.nodeValue;
+		if (edaily) {
+            /* Daily earnings data */
+            
+            temp = earnings.filter(function (item) {
+                if (item.indexOf("Today so far") !== -1) { return true; }
+            });
+            
+            now = temp[0][2];
+            
+            temp = earnings.filter(function (item) {
+                if (item.indexOf("Yesterday") !== -1) { return true; }
+            });
+            
+			y = temp[0][2];
 
-				/* check if earning data is more or
-				   less than previous day's earning */
-				if ((parseFloat(now.substr(1))) < (parseFloat(y.substr(1)))) {
-					dComp = "down";
-				} else {
-					dComp = "up";
-				}
-				
-                /* Currency conversion */
-				if (convert) {
-					now = now.trim();
-					y = y.trim();
-					
-					// remove dollar / euro symbol
-					now = now.slice(1);
-					y = y.slice(1);
-					
-					// convert to local currency
-					now = parseFloat(now) * rate;
-					y = parseFloat(y) * rate;
-					
-					// roundoff to 2 decimals
-					now = trueRound(now);
-					y = trueRound(y);
-					
-					now = String(now);
-					y = String(y);
-				}
-				eto = ['today', dComp, now, 'yesterday', y];
-				out.push(eto);
-			}
-			
-			if (emonthly) {
-				/* Daily earnings data */
-				
-				/* extract the earning data using the 
-				   obvious id's */
-				   
-				
-				tm = div.querySelector("#earnings-this-month").firstChild.nodeValue;
-				lm = div.querySelector("#earnings-last-month").firstChild.nodeValue;
-		
-
-				/* check if earning data is more or
-				   less than previous month's earning */
-				if ((parseFloat(tm.substr(1))) < (parseFloat(lm.substr(1)))) {
-					mComp = "down";
-				} else {
-					mComp = "up";
-				}
-                
-                /* Currency conversion */
-				if (convert) {
-					tm = tm.trim();
-					lm = lm.trim();
-					
-					// remove dollar / euro symbol
-					tm = tm.slice(1);
-					lm = lm.slice(1);
-					
-					// convert to local currency
-					tm = parseFloat(tm) * rate;
-					lm = parseFloat(lm) * rate;
-					
-					// roundoff to 2 decimals
-					tm = trueRound(tm);
-					lm = trueRound(lm);
-					
-					tm = String(tm);
-					lm = String(lm);
-				}
-				
-				emo = ['this month', mComp, tm, 'last month', lm];
-				out.push(emo);
-			}
-			
-			if (etotal) {
-				/* get total unpaid earnings - this
-				   is slightly tricky as there is no
-				   obvious id to search for this data */
-				
-				tue = div.querySelectorAll('ul.metrics-list li:first-of-type span.value');
-				te = tue[1].firstChild.nodeValue;
-                
-				if (convert) {
-					te = te.trim();
-					
-					// remove dollar / euro symbol
-					te = te.slice(1);
-					
-					// convert to local currency
-					te = parseFloat(te) * rate;
-					
-					// roundoff to 2 decimals
-					te = trueRound(te);
-					
-					te = String(te);
-				}
-                
-				etu = ['total', 'up', te, 'unpaid earnings'];
-				out.push(etu);
-			}
-			
-			/* check how the user wants data
-			   to be displayed. */
-			if (slideshow) {
-				refDial('slides', out);
+			/* check if earning data is more or
+			   less than previous day's earning */
+			if ((parseFloat(now.substr(1))) <= (parseFloat(y.substr(1)))) {
+				dComp = "down";
 			} else {
-				refDial('showall', out);
+				dComp = "up";
 			}
+				
+			if (convert) {
+				now = now.trim();
+				y = y.trim();
+				
+				// remove dollar / euro symbol
+				now = now.slice(1);
+				y = y.slice(1);
+					
+				// convert to local currency
+				now = parseFloat(now) * rate;
+				y = parseFloat(y) * rate;
+				
+				// roundoff to 2 decimals
+				now = trueRound(now);
+				y = trueRound(y);
+					
+				now = String(now);
+				y = String(y);
+			}
+				
+			eto = ['today', dComp, now, 'yesterday', y];
+			out.push(eto);
+        }
+			
+		if (emonthly) {
+            /* Monthly earnings data */
+            
+            temp = earnings.filter(function (item) {
+                if (item.indexOf("This month so far") !== -1) { return true; }
+            });
+            
+			tm = temp[0][2];
+        
+            temp = earnings.filter(function (item) {
+                if (item.indexOf("Last month") !== -1) { return true; }
+            });
+            
+			lm = temp[0][2];
+		  
+            /* check if earning data is more or
+			   less than previous month's earning */
+			
+            if ((parseFloat(tm.substr(1))) <= (parseFloat(lm.substr(1)))) {
+				mComp = "down";
+			} else {
+				mComp = "up";
+			}
+			
+			if (convert) {
+				tm = tm.trim();
+				lm = lm.trim();
+				
+				// remove dollar / euro symbol
+				tm = tm.slice(1);
+				lm = lm.slice(1);
+				
+				// convert to local currency
+				tm = parseFloat(tm) * rate;
+				lm = parseFloat(lm) * rate;
+				
+				// roundoff to 2 decimals
+				tm = trueRound(tm);
+				lm = trueRound(lm);
+				
+				tm = String(tm);
+				lm = String(lm);
+            }
+
+			emo = ['this month', mComp, tm, 'last month', lm];
+			out.push(emo);
 		}
-	}
+        
+        if (etotal) {
+		/* get total unpaid earnings */
+            
+            div = e('div');
+            div.innerHTML = etable;
+            
+            tue = div.querySelector("div#content table.paymentreport tbody tr.columntitle:last-child td:last-child");
+            te = tue.textContent;
+            
+            if (convert) {
+                te = te.trim();
+                
+                // remove dollar / euro symbol
+                te = te.slice(1);
+                
+                // convert to local currency
+                te = parseFloat(te) * rate;
+                
+                // roundoff to 2 decimals
+                te = trueRound(te);
+                
+                te = String(te);
+            }
+            
+            etu = ['total', 'up', te, 'unpaid earnings'];
+            out.push(etu);
+        }
+			
+        if (slideshow) {
+            refDial('slides');
+		} else {
+            refDial('showall');
+		}
+    }
 	
 	return;
 }
@@ -604,6 +603,47 @@ function converter(file, arc, luc) {
 	}
 	
 	return;
+}
+
+function authenticate(input) {
+/*  checks if user is logged in
+    and returns True or False */
+    
+    var gcode, div, login;
+    
+    allowed = false;
+    
+	if (input) {
+	/*  parse the scraped page we got from Google */
+		
+		/* extract <body> element kids from scraped page */
+		gcode = input.substring(input.indexOf("<body>") + 7, input.indexOf("</body>"));
+
+		/* We extract data based on the id's. 
+		   To do this efficiently, we use
+		   querySelector(), which works on DOM, 
+		   elements and document fragments. So we
+		   create an element, append the elements 
+		   from the scraped page and search for
+		   known ids using querySelector(). */
+		   
+		div = e('div');
+        
+        /* Note: innerHTML doesn't execute any 
+           JS code. */
+		div.innerHTML = gcode;
+		
+		/* the login form has an id called 'gaia_loginform' */
+		login = div.querySelector("#gaia_loginform");
+        
+        if (login) {
+            /* login form found */
+            allowed = false;
+        } else {
+            allowed = true;
+        }
+    }
+    return;
 }
 
 function getRates() {
@@ -636,64 +676,240 @@ function getRates() {
 			if (this.status === 200 && this.responseText) {
 				csvfile = this.responseText;
 				converter(csvfile, arc, luc);
+                extract();
 			} else {
 				/* possible network error -
 				   tell the user. */
-				console.log("Yahoo");
 				refDial('hang');
+                
+                /* reset refresh timer to check every  
+                   30 seconds if network is up */
+                setRefreshTimer(0.5);
 			}
 		}
 	};
 
-	ext.send();
-	return;
+    try {
+        ext.send();
+    } catch (e) {
+        /*  possible network error -
+            tell the user. */
+        
+        refDial("hang");
+        
+        /* reset refresh timer to check every  
+           30 seconds if network is up */
+        setRefreshTimer(0.5);
+    }
 }
 
-function getReport() {
-	/* Scrape the mobile version of 
-	   Google Adsense Control Panel. */
-	
-	var url, ext;
-	url = "https://www.google.com/adsense/v3/m/home";
+function getTotal() {
+/* To get total unpaid
+    finalised earnings. */
+
+    var url, xhr, p, convert;
+    convert = parseInt((localStorage.getItem('convert')), 10);
+    
+    /*  Total unpaid earnings is updated
+        only monthly. So once we get it, 
+        no need to constantly check 
+        again for updates. */
+    
+    if (totality) {
+        if (convert) {
+            getRates();
+        } else {
+            extract();
+        }
+        return;
+    }
+    
+	url = "https://www.google.com/adsense/reports-payment";
 	
 	refDial('wait');
-	ext = new XMLHttpRequest();
+	
+    xhr = new XMLHttpRequest();
+	xhr.open('POST', url, true);
+    p = "reportRange=ALL_TIME";
+	xhr.onload = function (event) {
+        if (this.status === 200) {
+            etable = this.responseText;
+            authenticate(etable);
+            if (allowed) {
+                totality = true;
+                if (convert) {
+                    getRates();
+                } else {
+                    extract();
+                }
+            } else {
+                totality = false;
+                
+                /* inform user to login */
+                refDial('login');
 
+                /* reset refresh timer to check every  
+                   2 minute if user has logged in */
+                setRefreshTimer(2);
+            }
+        } else {
+            /* possible network error -
+               tell the user. */
+            
+            refDial("hang");
+            
+            /* reset refresh timer to check every  
+               30 seconds if network is up */
+            setRefreshTimer(0.5);
+        }
+	};
+    
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    
+    try {
+        xhr.send(p);
+    } catch (e) {
+        /*  possible network error -
+            tell the user. */
+        
+        refDial("hang");
+        
+        /* reset refresh timer to check every  
+           30 seconds if network is up */
+        setRefreshTimer(0.5);
+    }
+}
+
+function getRaw(input) {
+/* Calls an interface that returns
+   an invalid JSON that has the daily
+   and monthly earnings data we seek. */
+    
+    var lfedata, url, xhr, a, b, c, onLoad;
+    
+    lfedata = input.substring(input.indexOf("ads.adsense.lightfe.main.init") + 31, input.indexOf("ads.adsense.lightfe.home.loadData"));
+        
+    /* TODO: error check lfedata  */
+    lfedata = lfedata.split(",");
+    
+    lfedata[0] = lfedata[0].trim();
+    lfedata[1] = lfedata[1].trim();
+    lfedata[0] = lfedata[0].substring(lfedata[0].indexOf("\'") + 1, lfedata[0].lastIndexOf("\'"));
+    lfedata[1] = lfedata[1].substring(lfedata[1].indexOf("\'") + 1, lfedata[1].lastIndexOf("\'"));
+    
+    url = "https://www.google.com/adsense/m/data/home?hl=" + lfedata[0];
+    xhr = new XMLHttpRequest();
+    
+    onLoad = function (e) {
+        if (e.target.status === 200) {
+            data = e.target.responseText;
+            
+            /* sample raw data - 
+            )]}'{"top_channels": [["channel-name", "$0.42"], ["channel-name", "$0.14"], ["channel-name", "$0.12"], ["channel-name", "$0.04"]], "accounts": [{"kind": "adsense#account", "premium": false, "id": "pub-01234567890123456", "name": "pub-01234567890123456"}], "earnings": [["Today so far", "-", "$0.25"], ["Yesterday", "Mon March 17, 2014", "$5.14"], ["This month so far", "March", "$30.64"], ["Last month", "February", "$28.59"]]} 
+            */
+            
+            // get valid JSON data from raw data
+            data = data.substring(data.indexOf("{"), data.length);
+            data = JSON.parse(data);
+            
+            getTotal();
+        } else {
+            /* possible network error -
+               tell the user. */
+                        
+            refDial("hang");
+            
+            /* reset refresh timer to check every  
+               30 seconds if network is up */
+            setRefreshTimer(0.5);
+        }
+    };
+    
+    a = '';
+    c = a + "=" + b;
+    
+    xhr.open('POST', url, true);
+    xhr.onload = onLoad;
+    xhr.withCredentials = true;
+    
+    xhr.setRequestHeader("X-Lightfe-Auth", "1");
+    xhr.setRequestHeader("Client-Version", lfedata[1]);
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+    
+    try {
+        xhr.send(c);
+    } catch (e) {
+        /*  possible network error -
+            tell the user. */
+        
+        refDial("hang");
+        
+        /* reset refresh timer to check every  
+           30 seconds if network is up */
+        setRefreshTimer(0.5);
+    }
+}
+
+function getPage() {
+/* Scrape the mobile version of 
+   Google Adsense Control Panel. */
+	
+	var url, ext;
+	url = "https://www.google.com/adsense/m/";
+	
+	refDial('wait');
+    
+	ext = new XMLHttpRequest();
 	ext.open('GET', url, true);
 	
 	ext.onreadystatechange = function (event) {
+        var page;
 		if (this.readyState === 4) {
 			if (this.status === 200 && this.responseText) {
-				data = this.responseText;
-				extract(data);
+				page = this.responseText;
+                authenticate(page);
+                if (allowed) {
+                    getRaw(page);
+                } else {
+                    /* inform user to login */
+                    refDial('login');
+
+                    /* reset refresh timer to check every  
+                       2 minute if user has logged in */
+                    setRefreshTimer(2);
+                }
 			} else {
 				/* possible network error -
 				   tell the user. */
-				console.log("Google");
+                
 				refDial('hang');
+                
+                /* reset refresh timer to check every  
+                   30 seconds if network is up */
+                setRefreshTimer(0.5);
 			}
 		}
 	};
 
-	ext.send();
-	return data;
+    try {
+        ext.send();
+    } catch (e) {
+        /*  possible network error -
+            tell the user. */
+        
+        refDial("hang");
+        
+        /* reset refresh timer to check every  
+           30 seconds if network is up */
+        setRefreshTimer(0.5);
+    }
 }
 
 function scrape() {
-	/* get the data */
+/* get the data */
 	
-	var convert = parseInt((localStorage.getItem('convert')), 10);
-	if (convert) {
-		getRates();
-	}
-	
-	getReport();
+	getPage();
 	return;
-}
-
-function setRefreshTimer(time) {
-	clearInterval(timeIt);
-	timeIt = setInterval(scrape, time * 60 * 1000);
 }
 
 function reconfigure(e) {
@@ -724,8 +940,8 @@ function reconfigure(e) {
 }
  
 function init() {
-	/* some basic settings intialised here
-	   to get the extension running */
+/*  Some basic settings intialised here
+	to get the extension running. */
 
 	if (localStorage) {
 	
@@ -733,12 +949,12 @@ function init() {
 			Specifies the time when data 
             should be refreshed and updated.
 			
-			Default: 20
+			Default: 30
 			Unit: Minute
             Type: Integer
 			User Customizable: YES */
 		if (!localStorage.getItem('interval')) {
-			localStorage.setItem('interval', '15');
+			localStorage.setItem('interval', '30');
 		}
 		
 		/*  2. SHOWFOR
