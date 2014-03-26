@@ -1,6 +1,6 @@
 {
 	"name": "Google Adsense Monitor",
-	"version": "15.11",
+	"version": "15.13",
 	"manifest_version": 2,	
 	"description": "Preview your Adsense earnings in an Opera Speed Dial.",
 	"developer": {
@@ -26,9 +26,8 @@
 		"js/options.js",
 		"pix/icon-128.png",
 		"pix/icon-64.png",
-		"pix/icon-icr.png",
-		"pix/icon-reminder.png",
-		"pix/loading.gif"
+		"pix/loading.gif",
+        "pix/wait.gif"
 	],
 	"permissions": [
 		"speeddial", 

@@ -34,6 +34,11 @@ Change display timings, data update intervals, options to view your earnings in 
 
 ## Changelog
 
+*Version 15.13* -  
+Fixed: Issue #4  
+Updated: New icon for error and login message.  
+Updated: Replaced icons in 'promo tag' with hyperlinks.  
+
 *Version 15.11* -  
 Updated: Added AZN to currency list.  
 
@@ -41,6 +46,8 @@ Updated: Added AZN to currency list.
 New: (Experimental) Automatically converts earnings into local currency from USD or EUR.  
 New: Versioning process. See Issue #1  
 Fixed: Issue #2.  
+
+**(New versioning scheme after v2.2).**   
  
 *Version 2.2* -  
 New: Option to display all earnings data in a tabular view.
