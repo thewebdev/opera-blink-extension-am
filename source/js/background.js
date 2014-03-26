@@ -66,7 +66,9 @@ function trueRound(value) {
 /*  Original code from stackoverflow.com 
 	Rounds a float to specified number of decimal places */
 
-	var digits = 2;
+	var digits;
+    
+    digits = 2;
     return (Math.round((value * Math.pow(10, digits)).toFixed(digits - 1)) / Math.pow(10, digits)).toFixed(digits);
 }
 
@@ -82,7 +84,18 @@ function createDl(kids) {
 	as it is faster to create the elements
 	separately and then add to the page. */
 	
-	var dl, dt, dd, tx, inHtml, list, temp, temp1, z, a, x, i;
+	var dl,
+        dt,
+        dd,
+        tx,
+        inHtml,
+        list,
+        temp,
+        temp1,
+        z,
+        a,
+        x,
+        i;
 	
 	inHtml = document.createDocumentFragment();
 	list = $("rateSlides");
@@ -166,7 +179,16 @@ function startSlide(count) {
 	   are displayed, while others stay
 	   hidden, using css. */
 	
-	var cls, dt, dd, done, tempDt, tempDd, e, i, s, t;
+	var cls,
+        dt,
+        dd,
+        done,
+        tempDt,
+        tempDd,
+        e,
+        i,
+        s,
+        t;
 	
 	done = false;
 	tempDt = [];
@@ -258,7 +280,10 @@ function refDial(cmd) {
 	/* Used to show the output
 	   in the speed dial. */
 	
-	var dt, dd, temp, o;
+	var dt,
+        dd,
+        temp,
+        o;
 	
 	if (cmd === "slides") {
 		/* Displays each data individually 
@@ -379,7 +404,7 @@ function refDial(cmd) {
 		/* tell the user to login */
 		
         $("indicator").setAttribute("src", "../pix/wait.gif");
-		$("msg").innerHTML = "please login" + "<br \\>" + "(and wait 2 minutes)";
+		$("msg").innerHTML = "Please login" + "<br \\>" + "(and wait 2 minutes)";
 
 		clearInterval(slider);
 		
@@ -408,7 +433,7 @@ function refDial(cmd) {
 		   has occured */
 
         $("indicator").setAttribute("src", "../pix/wait.gif");
-		$("msg").innerHTML = "possible network error" + "<br \\>" + "(will retry again later)";
+		$("msg").innerHTML = "Possible network error" + "<br \\>" + "(will retry again later)";
 		
 		clearInterval(slider);
 		hide("data");
@@ -436,7 +461,25 @@ function extract() {
 /*  Extract and format the raw 
     data for our use. */
 	   
-	var earnings, now, y, tm, lm, dComp, mComp, tue, te, eto, emo, etu, edaily, emonthly, etotal, slideshow, convert, temp, div;
+	var earnings,
+        now,
+        y,
+        tm,
+        lm,
+        dComp,
+        mComp,
+        tue,
+        te,
+        eto,
+        emo,
+        etu,
+        edaily,
+        emonthly,
+        etotal,
+        slideshow,
+        convert,
+        temp,
+        div;
 	
     out = [];
 	
@@ -455,17 +498,8 @@ function extract() {
 		if (edaily) {
             /* Daily earnings data */
             
-            temp = earnings.filter(function (item) {
-                if (item.indexOf("Today so far") !== -1) { return true; }
-            });
-            
-            now = temp[0][2];
-            
-            temp = earnings.filter(function (item) {
-                if (item.indexOf("Yesterday") !== -1) { return true; }
-            });
-            
-			y = temp[0][2];
+            now = earnings[0][2];
+			y = earnings[1][2];
 
 			/* check if earning data is more or
 			   less than previous day's earning */
@@ -502,17 +536,8 @@ function extract() {
 		if (emonthly) {
             /* Monthly earnings data */
             
-            temp = earnings.filter(function (item) {
-                if (item.indexOf("This month so far") !== -1) { return true; }
-            });
-            
-			tm = temp[0][2];
-        
-            temp = earnings.filter(function (item) {
-                if (item.indexOf("Last month") !== -1) { return true; }
-            });
-            
-			lm = temp[0][2];
+			tm = earnings[2][2];
+			lm = earnings[3][2];
 		  
             /* check if earning data is more or
 			   less than previous month's earning */
@@ -588,7 +613,9 @@ function extract() {
 function converter(file, arc, luc) {
 	/* Currency conversion */
 	
-	var csv, rates;
+	var csv,
+        rates;
+    
     csv = file.split(/\r?\n/);
 	
 	if (arc === 'USD') {
@@ -609,7 +636,9 @@ function authenticate(input) {
 /*  checks if user is logged in
     and returns True or False */
     
-    var gcode, div, login;
+    var gcode,
+        div,
+        login;
     
     allowed = false;
     
@@ -649,7 +678,12 @@ function authenticate(input) {
 function getRates() {
 	/* Get currency rate from Yahoo! */
 	
-	var csvfile, query, url, arc, luc, ext;
+	var csvfile,
+        query,
+        url,
+        arc,
+        luc,
+        ext;
     
     refDial('wait');
 
@@ -707,7 +741,11 @@ function getTotal() {
 /* To get total unpaid
     finalised earnings. */
 
-    var url, xhr, p, convert;
+    var url,
+        xhr,
+        p,
+        convert;
+    
     convert = parseInt((localStorage.getItem('convert')), 10);
     
     /*  Total unpaid earnings is updated
@@ -778,6 +816,11 @@ function getTotal() {
            30 seconds if network is up */
         setRefreshTimer(0.5);
     }
+    
+    /* TODO: Add month check so that
+    total is correct when user 
+    is up past midnight at the end
+    of a month. */
 }
 
 function getRaw(input) {
@@ -785,7 +828,10 @@ function getRaw(input) {
    an invalid JSON that has the daily
    and monthly earnings data we seek. */
     
-    var lfedata, url, xhr, a, b, c, onLoad;
+    var lfedata,
+        url,
+        xhr,
+        onLoad;
     
     lfedata = input.substring(input.indexOf("ads.adsense.lightfe.main.init") + 31, input.indexOf("ads.adsense.lightfe.home.loadData"));
         
@@ -825,9 +871,6 @@ function getRaw(input) {
         }
     };
     
-    a = '';
-    c = a + "=" + b;
-    
     xhr.open('POST', url, true);
     xhr.onload = onLoad;
     xhr.withCredentials = true;
@@ -837,7 +880,7 @@ function getRaw(input) {
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
     
     try {
-        xhr.send(c);
+        xhr.send();
     } catch (e) {
         /*  possible network error -
             tell the user. */
@@ -854,7 +897,9 @@ function getPage() {
 /* Scrape the mobile version of 
    Google Adsense Control Panel. */
 	
-	var url, ext;
+	var url,
+        ext;
+    
 	url = "https://www.google.com/adsense/m/";
 	
 	refDial('wait');
@@ -916,7 +961,6 @@ function reconfigure(e) {
 	/* Updates the speed dial when the 
 		user modifies & saves options. */
 
-	var gac = data;
 	switch (e.key) {
 	case 'interval':
 		setRefreshTimer(parseInt((localStorage.getItem('interval')), 10));
@@ -925,16 +969,16 @@ function reconfigure(e) {
 		setDisplayTimer();
 		break;
 	case 'edaily':
-		extract(gac);
+		extract();
 		break;
 	case 'emonthly':
-		extract(gac);
+		extract();
 		break;
 	case 'etotal':
-		extract(gac);
+		extract();
 		break;
 	case 'slideshow':
-		extract(gac);
+		extract();
 		break;
 	}
 }
