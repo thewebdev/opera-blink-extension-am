@@ -34,6 +34,9 @@ Change display timings, data update intervals, options to view your earnings in 
 
 ## Changelog
 
+*Version 15.14* -  
+Fixed: Issue #5  
+
 *Version 15.13* -  
 Fixed: Issue #4  
 Updated: New icon for error and login message.  

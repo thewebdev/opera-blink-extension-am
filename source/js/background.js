@@ -33,8 +33,7 @@ var data; // raw adsense data
 var etable; // earnings table page
 var out; // output data
 var rate; // parsed currency rates
-var totality = false; // flag for total earning
-var allowed = false; // flag for login check
+var haveTotal = false; // flag for total earning
 
 function $(v) {
 	/* DOM: identifies element */
@@ -427,6 +426,20 @@ function refDial(cmd) {
 		
 		return;
 	}
+    
+	if (cmd === "nodata") {
+		/* indicate some error
+		   has occured */
+
+        $("indicator").setAttribute("src", "../pix/wait.gif");
+		$("msg").innerHTML = "Problem fetching data" + "<br \\>" + "(will retry again later)";
+		
+		clearInterval(slider);
+		hide("data");
+		show("wait");
+		
+		return;
+	}
 	
 	if (cmd === "hang") {
 		/* indicate some error
@@ -447,7 +460,63 @@ function refDial(cmd) {
 		   has occured */
 		  
         $("indicator").setAttribute("src", "../pix/wait.gif");
-		$("msg").innerHTML = "Error 101: Couldn't initialize default values.";
+        $("msg").innerHTML = "Unexpected error #1" + "<br \\>" + "(will retry in 5 minutes)";
+		
+		clearInterval(slider);
+		hide("data");
+		show("wait");
+		
+		return;
+	}
+    
+	if (cmd === "e102") {
+		/* indicate some error
+		   has occured */
+		  
+        $("indicator").setAttribute("src", "../pix/wait.gif");
+        $("msg").innerHTML = "Unexpected error #2" + "<br \\>" + "(will retry in 5 minutes)";
+		
+		clearInterval(slider);
+		hide("data");
+		show("wait");
+		
+		return;
+	}
+    
+	if (cmd === "e103") {
+		/* indicate some error
+		   has occured */
+		  
+        $("indicator").setAttribute("src", "../pix/wait.gif");
+        $("msg").innerHTML = "Unexpected error #3" + "<br \\>" + "(will retry in 5 minutes)";
+		
+		clearInterval(slider);
+		hide("data");
+		show("wait");
+		
+		return;
+	}
+    
+	if (cmd === "e104") {
+		/* indicate some error
+		   has occured */
+		  
+        $("indicator").setAttribute("src", "../pix/wait.gif");
+        $("msg").innerHTML = "Unexpected error #4" + "<br \\>" + "(will retry in 5 minutes)";
+		
+		clearInterval(slider);
+		hide("data");
+		show("wait");
+		
+		return;
+	}
+    
+	if (cmd === "e105") {
+		/* indicate some error
+		   has occured */
+		  
+        $("indicator").setAttribute("src", "../pix/wait.gif");
+        $("msg").innerHTML = "Unexpected error #5" + "<br \\>" + "(will retry in 5 minutes)";
 		
 		clearInterval(slider);
 		hide("data");
@@ -578,8 +647,31 @@ function extract() {
             div = e('div');
             div.innerHTML = etable;
             
-            tue = div.querySelector("div#content table.paymentreport tbody tr.columntitle:last-child td:last-child");
-            te = tue.textContent;
+            /*  if selectors specified are invalid,
+                a syntax error will be thrown. */
+            
+            try {
+                tue = div.querySelector("div#content table.paymentreport tbody tr.columntitle:last-child td:last-child");
+            } catch (f) {
+                /*  Unexpected Error #4 - inform
+                user and retry after 5 minutes */
+                refDial("e104");
+                setRefreshTimer(5);
+                return;
+            }
+            
+            /*  if selectors weren't found
+                tue will be null */
+            
+            if (tue) {
+                te = tue.textContent;
+            } else {
+                /*  Unexpected Error #5 - inform
+                user and retry after 5 minutes */
+                refDial("e105");
+                setRefreshTimer(5);
+                return;
+            }
             
             if (convert) {
                 te = te.trim();
@@ -636,7 +728,8 @@ function authenticate(input) {
 /*  checks if user is logged in
     and returns True or False */
     
-    var gcode,
+    var allowed,
+        gcode,
         div,
         login;
     
@@ -672,7 +765,7 @@ function authenticate(input) {
             allowed = true;
         }
     }
-    return;
+    return allowed;
 }
 
 function getRates() {
@@ -712,13 +805,11 @@ function getRates() {
 				converter(csvfile, arc, luc);
                 extract();
 			} else {
-				/* possible network error -
-				   tell the user. */
-				refDial('hang');
+				/*  problem fetching data; retry 
+                    after 1 minute */
                 
-                /* reset refresh timer to check every  
-                   30 seconds if network is up */
-                setRefreshTimer(0.5);
+				refDial('nodata');
+                setRefreshTimer(1);
 			}
 		}
 	};
@@ -753,7 +844,7 @@ function getTotal() {
         no need to constantly check 
         again for updates. */
     
-    if (totality) {
+    if (haveTotal) {
         if (convert) {
             getRates();
         } else {
@@ -772,16 +863,15 @@ function getTotal() {
 	xhr.onload = function (event) {
         if (this.status === 200) {
             etable = this.responseText;
-            authenticate(etable);
-            if (allowed) {
-                totality = true;
+            if (authenticate(etable)) {
+                haveTotal = true;
                 if (convert) {
                     getRates();
                 } else {
                     extract();
                 }
             } else {
-                totality = false;
+                haveTotal = false;
                 
                 /* inform user to login */
                 refDial('login');
@@ -791,14 +881,11 @@ function getTotal() {
                 setRefreshTimer(2);
             }
         } else {
-            /* possible network error -
-               tell the user. */
-            
-            refDial("hang");
-            
-            /* reset refresh timer to check every  
-               30 seconds if network is up */
-            setRefreshTimer(0.5);
+            /*  problem fetching data; retry 
+                after 1 minute */
+
+            refDial('nodata');
+            setRefreshTimer(1);
         }
 	};
     
@@ -835,8 +922,16 @@ function getRaw(input) {
     
     lfedata = input.substring(input.indexOf("ads.adsense.lightfe.main.init") + 31, input.indexOf("ads.adsense.lightfe.home.loadData"));
         
-    /* TODO: error check lfedata  */
     lfedata = lfedata.split(",");
+    
+    /* error check lfedata  */
+    if (lfedata.length === 1) {
+        /*  Unexpected Error #2 - inform
+            user and retry after 5 minutes */
+		refDial('e102');
+        setRefreshTimer(5);
+        return;
+    }
     
     lfedata[0] = lfedata[0].trim();
     lfedata[1] = lfedata[1].trim();
@@ -856,18 +951,25 @@ function getRaw(input) {
             
             // get valid JSON data from raw data
             data = data.substring(data.indexOf("{"), data.length);
-            data = JSON.parse(data);
+            
+            try {
+                data = JSON.parse(data);
+            } catch (f) {
+                /*  Unexpected Error #3 - inform
+                    user and retry after 5 minutes */
+                refDial('e103');
+                setRefreshTimer(5);
+                return;
+            }
             
             getTotal();
-        } else {
-            /* possible network error -
-               tell the user. */
-                        
-            refDial("hang");
             
-            /* reset refresh timer to check every  
-               30 seconds if network is up */
-            setRefreshTimer(0.5);
+        } else {
+            /*  problem fetching data; retry 
+                after 1 minute */
+
+            refDial('nodata');
+            setRefreshTimer(1);
         }
     };
     
@@ -912,8 +1014,7 @@ function getPage() {
 		if (this.readyState === 4) {
 			if (this.status === 200 && this.responseText) {
 				page = this.responseText;
-                authenticate(page);
-                if (allowed) {
+                if (authenticate(page)) {
                     getRaw(page);
                 } else {
                     /* inform user to login */
@@ -924,14 +1025,11 @@ function getPage() {
                     setRefreshTimer(2);
                 }
 			} else {
-				/* possible network error -
-				   tell the user. */
+				/*  problem fetching data; retry 
+                    after 1 minute */
                 
-				refDial('hang');
-                
-                /* reset refresh timer to check every  
-                   30 seconds if network is up */
-                setRefreshTimer(0.5);
+				refDial('nodata');
+                setRefreshTimer(1);
 			}
 		}
 	};
@@ -1038,11 +1136,11 @@ function init() {
 			Indicates whether to display total 
 			unpaid earnings.
 			
-			Default: 1
+			Default: 0
 			Type: Boolean (1 = TRUE, 0 = FALSE)
 			User Customizable: YES */
 		if (!localStorage.getItem('etotal')) {
-			localStorage.setItem('etotal', '1');
+			localStorage.setItem('etotal', '0');
 		}
 		
 		/*  6. SLIDESHOW
@@ -1093,7 +1191,9 @@ function init() {
 		scrape();
 		
 	} else {
+        /* Unexpected Error #1 */
 		refDial('e101');
+        setRefreshTimer(5);
 	}
 	
 	/* monitors if options are updated and saved */
