@@ -1136,11 +1136,11 @@ function init() {
 			Indicates whether to display total 
 			unpaid earnings.
 			
-			Default: 1
+			Default: 0
 			Type: Boolean (1 = TRUE, 0 = FALSE)
 			User Customizable: YES */
 		if (!localStorage.getItem('etotal')) {
-			localStorage.setItem('etotal', '1');
+			localStorage.setItem('etotal', '0');
 		}
 		
 		/*  6. SLIDESHOW
