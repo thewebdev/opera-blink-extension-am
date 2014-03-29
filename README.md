@@ -21,7 +21,7 @@ Google Adsense Monitor can automatically convert and display your earnings in yo
 The colour of the earning data indicate whether your earnings have improved or not. Red indicates a drop in earning, while green indicates an improvement.
 
 4. **Automatic Updates**  
-Once you have logged in, Google Adsense Monitor downloads new Adsense earnings data every 15 minutes.  
+Once you have logged in, Google Adsense Monitor downloads new Adsense earnings data every 30 minutes.  
 
 5. **Customisable**  
 Change display timings, data update intervals, options to view your earnings in different ways etc., as per your preference.   
@@ -33,6 +33,12 @@ Change display timings, data update intervals, options to view your earnings in 
 2. The upward and the downward swing (indicated by the green and red colour, respectively) of the earnings data is based on the comparison with the previous period's earning (i.e. today's earning is compared with yesterday's, and this month's earning is compared with last month's).
 
 ## Changelog
+
+*Version 15.16* -  
+New: Scrape total from TSV file.
+Changed: Introduced delay between scraping pages.
+Updated: Adsense currency report list - AUD, GBP.
+Updated: Online support highlighted.
 
 *Version 15.14* -  
 Fixed: Issue #5  
