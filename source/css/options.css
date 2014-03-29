@@ -1,4 +1,4 @@
-﻿/*
+/*
 	This file is part of Google Adsense Monitor. Google Adsense Monitor
 	is an Opera 15+ extension that lets you view updates to your latest 
 	adsense earnings in an Opera Speed Dial.
@@ -109,6 +109,11 @@ header {
 	font-weight: bold;
 	background: #BC0808;
 	border-radius: 3px;
+}
+#support {
+    background-color: #fffcd3;
+    border-top-right-radius: 15px;
+    border-top-left-radius: 15px;
 }
 #input label {
 	padding:2px;
