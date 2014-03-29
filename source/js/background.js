@@ -30,10 +30,9 @@
 var timeIt = null; // data refresh timer
 var slider; // slide time delay
 var data; // raw adsense data
-var etable; // earnings table page
+var total; // total unpaid earnings
 var out; // output data
 var rate; // parsed currency rates
-var haveTotal = false; // flag for total earning
 
 function $(v) {
 	/* DOM: identifies element */
@@ -545,6 +544,7 @@ function extract() {
         edaily,
         emonthly,
         etotal,
+        arc,
         slideshow,
         convert,
         temp,
@@ -558,6 +558,7 @@ function extract() {
 	
 	slideshow = parseInt((localStorage.getItem('slideshow')), 10);
 	convert = parseInt((localStorage.getItem('convert')), 10);
+    arc = localStorage.getItem('arc');
     
     earnings = data.earnings;
 	
@@ -582,9 +583,38 @@ function extract() {
 				now = now.trim();
 				y = y.trim();
 				
-				// remove dollar / euro symbol
-				now = now.slice(1);
-				y = y.slice(1);
+                // remove currency symbol
+                
+                switch (arc) {
+                case "USD":
+                    now = now.substring(now.indexOf('$') + 1);
+                    y = y.substring(y.indexOf('$') + 1);
+                    now = now.trim();
+                    y = y.trim();
+                    break;
+                        
+                case "GBP":
+                    now = now.substring(now.indexOf('£') + 1);
+                    y = y.substring(y.indexOf('£') + 1);
+                    now = now.trim();
+                    y = y.trim();
+                    break;
+                        
+                case "AUD":
+                    now = now.substring(now.indexOf('$') + 1);
+                    y = y.substring(y.indexOf('$') + 1);
+                    now = now.trim();
+                    y = y.trim();
+                    break;
+                        
+                case "EUR":
+                    now = now.substring(now.indexOf('€') + 1);
+                    y = y.substring(y.indexOf('€') + 1);
+                    now = now.trim();
+                    y = y.trim();
+                    break;
+                }
+
 					
 				// convert to local currency
 				now = parseFloat(now) * rate;
@@ -621,9 +651,37 @@ function extract() {
 				tm = tm.trim();
 				lm = lm.trim();
 				
-				// remove dollar / euro symbol
-				tm = tm.slice(1);
-				lm = lm.slice(1);
+				// remove currency symbol
+                switch (arc) {
+                case "USD":
+                    tm = tm.substring(tm.indexOf('$') + 1);
+                    lm = lm.substring(lm.indexOf('$') + 1);
+                    tm = tm.trim();
+                    lm = lm.trim();
+                    break;
+                        
+                case "GBP":
+                    tm = tm.substring(tm.indexOf('£') + 1);
+                    lm = lm.substring(lm.indexOf('£') + 1);
+                    tm = tm.trim();
+                    lm = lm.trim();
+                    break;
+                        
+                case "AUD":
+                    tm = tm.substring(tm.indexOf('$') + 1);
+                    lm = lm.substring(lm.indexOf('$') + 1);
+                    tm = tm.trim();
+                    lm = lm.trim();
+                    break;
+                        
+                case "EUR":
+                    tm = tm.substring(tm.indexOf('€') + 1);
+                    lm = lm.substring(lm.indexOf('€') + 1);
+                    tm = tm.trim();
+                    lm = lm.trim();
+                    break;
+                }
+
 				
 				// convert to local currency
 				tm = parseFloat(tm) * rate;
@@ -642,43 +700,11 @@ function extract() {
 		}
         
         if (etotal) {
-		/* get total unpaid earnings */
+		/* total unpaid earnings */
             
-            div = e('div');
-            div.innerHTML = etable;
-            
-            /*  if selectors specified are invalid,
-                a syntax error will be thrown. */
-            
-            try {
-                tue = div.querySelector("div#content table.paymentreport tbody tr.columntitle:last-child td:last-child");
-            } catch (f) {
-                /*  Unexpected Error #4 - inform
-                user and retry after 5 minutes */
-                refDial("e104");
-                setRefreshTimer(5);
-                return;
-            }
-            
-            /*  if selectors weren't found
-                tue will be null */
-            
-            if (tue) {
-                te = tue.textContent;
-            } else {
-                /*  Unexpected Error #5 - inform
-                user and retry after 5 minutes */
-                refDial("e105");
-                setRefreshTimer(5);
-                return;
-            }
+            te = total;
             
             if (convert) {
-                te = te.trim();
-                
-                // remove dollar / euro symbol
-                te = te.slice(1);
-                
                 // convert to local currency
                 te = parseFloat(te) * rate;
                 
@@ -755,9 +781,20 @@ function authenticate(input) {
            JS code. */
 		div.innerHTML = gcode;
 		
-		/* the login form has an id called 'gaia_loginform' */
-		login = div.querySelector("#gaia_loginform");
+        /*  Error detection -
+            if selectors specified are invalid,
+            a syntax error will be thrown. */
         
+        try {
+            /* the login form has an id called 'gaia_loginform' */
+		    login = div.querySelector("#gaia_loginform");
+        } catch (g) {
+            login = null;
+        }
+        
+        /*  if selector isn't found
+            login will be null */
+ 
         if (login) {
             /* login form found */
             allowed = false;
@@ -784,12 +821,22 @@ function getRates() {
     arc = localStorage.getItem('arc');
 	luc = localStorage.getItem('luc');
 	
-	if (arc === 'USD') {
-		query = arc + luc + '=X';
-	}
-	
-	if (arc === 'EUR') {
+    switch (arc) {
+    case 'USD':
+        query = arc + luc + '=X';
+        break;
+
+	case 'EUR':
 		query = 'USDEUR=X&s=USD' + luc + '=X';
+        break;
+	 
+	case 'GBP':
+		query = 'USDGBP=X&s=USD' + luc + '=X';
+        break;
+    
+	case 'AUD':
+		query = 'USDAUD=X&s=USD' + luc + '=X';
+        break;
 	}
 	
 	url = url + query;
@@ -832,19 +879,129 @@ function getTotal() {
 /* To get total unpaid
     finalised earnings. */
 
-    var url,
+    var today,
+        month,
+        convert,
+        url,
         xhr,
-        p,
-        convert;
+        params,
+        id;
     
-    convert = parseInt((localStorage.getItem('convert')), 10);
+	refDial('wait');
     
-    /*  Total unpaid earnings is updated
-        only monthly. So once we get it, 
-        no need to constantly check 
-        again for updates. */
+    today = new Date();
+    month = parseInt(localStorage.getItem('month'), 10);
+    convert = parseInt(localStorage.getItem('convert'), 10);
     
-    if (haveTotal) {
+    /*  Be nice to Google.
+        Total unpaid earnings is updated
+        only monthly. So once we have it, 
+        do monthly updates only for it. */
+    
+    /*  We need to get the total from
+        Adsense, if -
+        (1) 'month' preference is default 
+             value 13 OR
+        (2) we have last month's total. */
+    
+    if ((today.getMonth() > month) || (month === 13)) {
+        
+        /* error detection - check data */
+        try {
+            id = data.accounts[0].id;
+        } catch (f) {
+            /*  problem fetching data; retry 
+                after 1 minute */
+    
+            refDial('nodata');
+            setRefreshTimer(1);
+        }
+        
+        /*  error detection - check id
+            is not undefined */
+        
+        if (id) {
+            params = "csv=true&historical=false&reportRange=ALL_TIME&pid=" + id.trim();
+        } else {
+            /*  problem fetching data; retry 
+                after 1 minute */
+    
+            refDial('nodata');
+            setRefreshTimer(1);
+        }
+        
+        url = "https://www.google.com/adsense/reports-payment?" + params;
+        
+        xhr = new XMLHttpRequest();
+        xhr.open('get', url, true);
+
+        xhr.onload = function (event) {
+            var tsv,
+                temp,
+                convert;
+            
+            if (this.status === 200) {
+                tsv = this.responseText;
+                if (authenticate(tsv)) {
+                    /* lazy parsing */
+                    temp = tsv.split("\t");
+                    total = temp[temp.length - 1].trim();
+                    
+                    /*  error detection - total
+                        should be a number */
+                    
+                    if (parseFloat(total, 10)) {
+                        localStorage.setItem('total', total);
+                        localStorage.setItem('month', String(today.getMonth()));
+                        
+                        convert = parseInt(localStorage.getItem('convert'), 10);
+                    
+                        if (convert) {
+                            getRates();
+                        } else {
+                            extract();
+                        }
+                    } else {
+                        /*  problem fetching data; retry 
+                            after 1 minute */
+            
+                        refDial('nodata');
+                        setRefreshTimer(1);
+                    }
+                } else {
+                    /*  inform user to login - check
+                        again every 2 minutes */
+                    
+                    refDial('login');
+                    setRefreshTimer(2);
+                }
+            } else {
+                /*  problem fetching data; retry 
+                    after 1 minute */
+    
+                refDial('nodata');
+                setRefreshTimer(1);
+            }
+        };
+        
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        
+        try {
+            xhr.send();
+        } catch (e) {
+            /*  possible network error -
+                tell the user. */
+            
+            refDial("hang");
+            
+            /* reset refresh timer to check every  
+               30 seconds if network is up */
+            setRefreshTimer(0.5);
+        }
+    } else {
+        /* reuse saved value */
+        total = localStorage.getItem('total');
+
         if (convert) {
             getRates();
         } else {
@@ -852,62 +1009,6 @@ function getTotal() {
         }
         return;
     }
-    
-	url = "https://www.google.com/adsense/reports-payment";
-	
-	refDial('wait');
-	
-    xhr = new XMLHttpRequest();
-	xhr.open('POST', url, true);
-    p = "reportRange=ALL_TIME";
-	xhr.onload = function (event) {
-        if (this.status === 200) {
-            etable = this.responseText;
-            if (authenticate(etable)) {
-                haveTotal = true;
-                if (convert) {
-                    getRates();
-                } else {
-                    extract();
-                }
-            } else {
-                haveTotal = false;
-                
-                /* inform user to login */
-                refDial('login');
-
-                /* reset refresh timer to check every  
-                   2 minute if user has logged in */
-                setRefreshTimer(2);
-            }
-        } else {
-            /*  problem fetching data; retry 
-                after 1 minute */
-
-            refDial('nodata');
-            setRefreshTimer(1);
-        }
-	};
-    
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    
-    try {
-        xhr.send(p);
-    } catch (e) {
-        /*  possible network error -
-            tell the user. */
-        
-        refDial("hang");
-        
-        /* reset refresh timer to check every  
-           30 seconds if network is up */
-        setRefreshTimer(0.5);
-    }
-    
-    /* TODO: Add month check so that
-    total is correct when user 
-    is up past midnight at the end
-    of a month. */
 }
 
 function getRaw(input) {
@@ -962,7 +1063,10 @@ function getRaw(input) {
                 return;
             }
             
-            getTotal();
+            /*  5 seconds delay to make
+                Google happy */
+            
+            setTimeout(getTotal, 5 * 1000);
             
         } else {
             /*  problem fetching data; retry 
@@ -1015,7 +1119,9 @@ function getPage() {
 			if (this.status === 200 && this.responseText) {
 				page = this.responseText;
                 if (authenticate(page)) {
-                    getRaw(page);
+                    /*  5 seconds delay to make
+                        Google happy */
+                    setTimeout(getRaw, 5 * 1000, page);
                 } else {
                     /* inform user to login */
                     refDial('login');
@@ -1185,6 +1291,28 @@ function init() {
 			User Customizable: YES */
 		if (!localStorage.getItem('luc')) {
 			localStorage.setItem('luc', 'GBP');
+		}
+        
+		/*  10. TOTAL
+			Stores 'total unpaid earnings' 
+            scraped from earnings TSV report.
+			
+			Default: "none"
+			Type: String
+			User Customizable: NO */
+		if (!localStorage.getItem('total')) {
+			localStorage.setItem('total', 'none');
+		}
+        
+		/*  11. MONTH
+			Tracks the month for which we
+            have the total earnings.
+			
+			Default: 13
+            Type: Integer (Javascript Date() months (0-11))
+			User Customizable: NO */
+		if (!localStorage.getItem('month')) {
+			localStorage.setItem('month', '13');
 		}
 		
 		timeIt = setInterval(scrape, parseInt((localStorage.getItem('interval')), 10) * 60 * 1000);
