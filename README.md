@@ -34,6 +34,12 @@ Change display timings, data update intervals, options to view your earnings in 
 
 ## Changelog
 
+*Version 15.16* -  
+New: Scrape total from TSV file.
+Changed: Introduced delay between scraping pages.
+Updated: Adsense currency report list - AUD, GBP.
+Updated: Online support highlighted.
+
 *Version 15.14* -  
 Fixed: Issue #5  
 
